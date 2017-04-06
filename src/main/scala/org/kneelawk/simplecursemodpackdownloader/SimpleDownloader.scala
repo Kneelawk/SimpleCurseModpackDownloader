@@ -7,6 +7,8 @@ import com.ning.http.client.HttpResponseHeaders
 import com.ning.http.client.HttpResponseBodyPart
 import com.ning.http.client.HttpResponseStatus
 import java.io.FileOutputStream
+import com.ning.http.client.AsyncHttpClientConfig
+import com.ning.http.client.AsyncHttpClient
 
 object SimpleDownloader {
   def apply(args: Array[String]) {
@@ -20,7 +22,12 @@ object SimpleDownloader {
     val password = args(2)
     val projectId = args(3).toInt
     val fileId = args(4).toInt
-    val client = Http.configure(_.setFollowRedirect(true))
+    val config = new AsyncHttpClientConfig.Builder()
+      .setUserAgent("CurseModpackDownloader/0.0.1")
+      .setRequestTimeout(-1)
+      .setFollowRedirect(true)
+      .build()
+    val client = new Http(new AsyncHttpClient(config))
     try {
       println("Getting mod download...")
       val futDownload = Future({
@@ -29,7 +36,6 @@ object SimpleDownloader {
         for (fail <- futAuth.failed) {
           fail.printStackTrace()
           client.shutdown()
-          Http.shutdown()
         }
         val auth = futAuth()
         val futModFile = CurseUtils.getAddonFile(client, auth.authToken, projectId, fileId)
@@ -37,7 +43,6 @@ object SimpleDownloader {
         for (fail <- futModFile.failed) {
           fail.printStackTrace()
           client.shutdown()
-          Http.shutdown()
         }
         futModFile()
       })
@@ -70,7 +75,6 @@ object SimpleDownloader {
           def onThrowable(t: Throwable): Unit = {
             t.printStackTrace()
             client.shutdown()
-            Http.shutdown()
           }
         }
         val fileFut = client(fileUrl > downloader)
@@ -78,13 +82,11 @@ object SimpleDownloader {
           fstream.close()
           println("Done.")
           client.shutdown()
-          Http.shutdown()
         }
       }
     } catch {
       case _: Exception =>
         client.shutdown()
-        Http.shutdown()
     }
   }
 }
