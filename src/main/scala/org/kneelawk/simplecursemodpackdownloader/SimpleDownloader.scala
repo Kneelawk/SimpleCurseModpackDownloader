@@ -1,19 +1,17 @@
 package org.kneelawk.simplecursemodpackdownloader
 
-import org.json4s.JsonMethods
 import java.io.File
-import com.ning.http.client.AsyncHandler
-import com.ning.http.client.HttpResponseHeaders
-import com.ning.http.client.HttpResponseBodyPart
-import com.ning.http.client.HttpResponseStatus
-import java.io.FileOutputStream
-import com.ning.http.client.AsyncHttpClientConfig
+
 import com.ning.http.client.AsyncHttpClient
+import com.ning.http.client.AsyncHttpClientConfig
+
+import dispatch.Defaults.executor
+import dispatch.Future
+import dispatch.Http
+import dispatch.enrichFuture
 
 object SimpleDownloader {
   def apply(args: Array[String]) {
-    import dispatch._, Defaults._
-    import org.json4s._, JsonDSL._, jackson.JsonMethods._
     if (args.length < 5) {
       println("args: simple <username> <password> <projectId> <fileId>")
       return
@@ -50,37 +48,17 @@ object SimpleDownloader {
         val outDir = new File("output")
         if (!outDir.exists()) outDir.mkdirs()
         val outFile = new File(outDir, file.diskFileName)
-        val fstream = new FileOutputStream(outFile)
         println(file.downloadUrl)
-        val fileUrl = url(file.downloadUrl)
-        val downloader = new AsyncHandler[File] {
-          var size = 0
-          var downloaded = 0
-          def onBodyPartReceived(res: HttpResponseBodyPart): AsyncHandler.STATE = {
-            val data = res.getBodyPartBytes
-            fstream.write(data);
-            downloaded += data.length
-            println(downloaded + " / " + size)
-            AsyncHandler.STATE.CONTINUE
-          }
-          def onCompleted(): File = outFile
-          def onHeadersReceived(res: HttpResponseHeaders): AsyncHandler.STATE = {
-            val headers = res.getHeaders
-            size = headers.getFirstValue("Content-Length").toInt
-            AsyncHandler.STATE.CONTINUE
-          }
-          def onStatusReceived(res: HttpResponseStatus): AsyncHandler.STATE = {
-            if (res.getStatusCode / 100 == 2) AsyncHandler.STATE.CONTINUE else AsyncHandler.STATE.ABORT
-          }
-          def onThrowable(t: Throwable): Unit = {
-            t.printStackTrace()
-            client.shutdown()
-          }
-        }
-        val fileFut = client(fileUrl > downloader)
+        val fileFut = Downloader.download(client, file.downloadUrl, outFile)
+          .onDownloadProgress(progress => println(progress.downloaded + " / " + progress.maxSize))
+          .onDownloadError(_.printStackTrace())
+          .start
         for (a <- fileFut) {
-          fstream.close()
           println("Done.")
+          client.shutdown()
+        }
+        for (t <- fileFut.failed) {
+          t.printStackTrace()
           client.shutdown()
         }
       }
