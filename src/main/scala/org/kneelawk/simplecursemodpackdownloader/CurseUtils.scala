@@ -215,6 +215,7 @@ object CurseUtils {
       }
       case t: StatusCode if t.code == 404 => {
         getLatestAddonFile(client, authToken, id, minecraftVersion)
+        // Should we find a way to get this event to the final listener?
       }
     }
   }
