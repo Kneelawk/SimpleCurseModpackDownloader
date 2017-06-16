@@ -6,7 +6,7 @@ import org.kneelawk.simplecursemodpackdownloader.logintest.LoginTest
 
 object SimpleCurseModpackDownloader {
   def main(args: Array[String]) {
-    if (args.length > 1) {
+    if (args.length >= 1) {
       args(0).toLowerCase() match {
         case "cli" => {
           CLIDownloader(args)
