@@ -49,10 +49,10 @@ object SimpleDownloader {
         if (!outDir.exists()) outDir.mkdirs()
         val outFile = new File(outDir, file.diskFileName)
         println(file.downloadUrl)
-        val fileFut = Downloader.download(client, file.downloadUrl, outFile)
+        val fileFut = new Download(outFile, file.downloadUrl)
           .onDownloadProgress(progress => println(progress.downloaded + " / " + progress.maxSize))
           .onDownloadError(_.printStackTrace())
-          .start
+          .start(client)
         for (a <- fileFut) {
           println("Done.")
           client.shutdown()
