@@ -19,6 +19,10 @@ class ModpackEngine(client: Http, authToken: String, modpack: ModpackManifest,
   import ModEngineState._
 
   def start {
+    /*
+     * Note: This system doesn't regulate the number of concurrent downloads.
+     * This system will likely need to be modified.
+     */
     var engines = modpack.files.map(f =>
       new ModEngine(client, authToken, modpack.minecraft.version, f.projectId,
         f.fileId, modsDir, listener.createModProgressListener(f.projectId, f.fileId)))
@@ -31,6 +35,9 @@ class ModpackEngine(client: Http, authToken: String, modpack: ModpackManifest,
   }
 }
 
+/**
+ * This locates and downloads a file based on project and file ids.
+ */
 class ModEngine(client: Http, authToken: String, minecraftVersion: String,
     projectId: Int, fileId: Int, modsDir: File, listener: ModProgressListener) {
   import ModEngineState._
