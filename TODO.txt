@@ -1,5 +1,7 @@
 Things that still need to be done:
 Route mod redirection events to the final event handler.
 Throw out dispatch.
+Add proper abort support.
+Add zombie auto killer.
 Make ModEngine be able to limit the number of concurrent downloads.
 Refine command line interface.
