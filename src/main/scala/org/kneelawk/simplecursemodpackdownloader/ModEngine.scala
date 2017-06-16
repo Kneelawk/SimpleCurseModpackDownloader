@@ -10,6 +10,10 @@ import dispatch.Defaults.executor
 import dispatch.Http
 import dispatch.StatusCode
 
+/*
+ * This file is where the magic happens.
+ */
+
 class ModpackEngine(client: Http, authToken: String, modpack: ModpackManifest,
     modsDir: File, listener: ModpackProgressListener) {
   import ModEngineState._
