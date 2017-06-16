@@ -21,11 +21,13 @@ package org.kneelawk.simplecursemodpackdownloader
  * restarting killed zombie
  */
 trait ModpackProgressListener {
-  def onOverallProgress(current: Float, max: Float)
+  def onOverallProgress(current: Long, max: Long)
 
   def createModProgressListener(projectId: Int, fileId: Int): ModProgressListener
 
   def onAllModsComplete
+
+  def onDeath
 
   def onAbort
 }
@@ -40,6 +42,7 @@ trait ModpackProgressListener {
 
 /*
  * A listener for each file?
+ * Question: Should there be an event for a mod with an invalid fileId defaulting?
  */
 trait ModProgressListener {
   def onBeginResolvingMod
@@ -48,7 +51,7 @@ trait ModProgressListener {
 
   def onBeginModDownload
 
-  def onModDownloadProgress(current: Float, max: Float)
+  def onModDownloadProgress(current: Long, max: Long)
 
   def onCompletedModDownload
 
@@ -57,6 +60,6 @@ trait ModProgressListener {
   def onCrash(t: Throwable)
 
   def onDeath(t: Throwable)
-  
+
   def onAbort
 }
