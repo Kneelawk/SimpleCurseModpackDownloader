@@ -5,6 +5,8 @@ import org.json4s._, JsonDSL._, jackson.JsonMethods._
 import java.util.Date
 import java.text.SimpleDateFormat
 import java.util.TimeZone
+import java.util.concurrent.ExecutionException
+import java.io.IOException
 
 case class UserData(username: String, userId: Int, email: String, authToken: String)
 
@@ -148,6 +150,9 @@ object ModData {
   }
 }
 
+case class NoFileForMinecraftVersionException(minecraftVersion: String)
+  extends Exception("No mod file for minecraft " + minecraftVersion)
+
 object CurseUtils {
   private implicit val formats = DefaultFormats
 
@@ -183,10 +188,34 @@ object CurseUtils {
   }
 
   def getAddonFiles(client: Http, authToken: String, id: Int): Future[List[ModFile]] = {
-    return client(addonFilesReq(authToken, id) OK as.json4s.Json).map(x => for (file <- x.children) yield ModFile(file))
+    return client(addonFilesReq(authToken, id) OK as.json4s.Json).map(x => {
+      for (file <- (x \ "files").children) yield ModFile(file)
+    })
   }
 
   def getAddonFile(client: Http, authToken: String, id: Int, fileId: Int): Future[ModFile] = {
     return client(addonFileReq(authToken, id, fileId) OK as.json4s.Json).map(x => ModFile(x))
+  }
+
+  def getLatestAddonFile(client: Http, authToken: String, id: Int, minecraftVersion: String): Future[ModFile] = {
+    return getAddonFiles(client, authToken, id)
+      .map(l => {
+        val corver = l.filter(_.gameVersions.contains(minecraftVersion))
+        if (corver.isEmpty)
+          throw new NoFileForMinecraftVersionException(minecraftVersion)
+        corver.reduceLeft((a, b) => if (a.fileDate.compareTo(b.fileDate) >= 0) a else b)
+      })
+  }
+
+  def getExistingAddonFile(client: Http, authToken: String, id: Int, fileId: Int, minecraftVersion: String): Future[ModFile] = {
+    getAddonFile(client, authToken, id, fileId).recoverWith {
+      case t: ExecutionException if t.getCause.isInstanceOf[StatusCode]
+        && t.getCause.asInstanceOf[StatusCode].code == 404 => {
+        getLatestAddonFile(client, authToken, id, minecraftVersion)
+      }
+      case t: StatusCode if t.code == 404 => {
+        getLatestAddonFile(client, authToken, id, minecraftVersion)
+      }
+    }
   }
 }
