@@ -1,0 +1,7 @@
+The downloader will likely revolve around a cancelable tree system.
+When a parent controller is canceled, all its children are canceled
+too. But when a child is canceled only it is canceled.
+
+What events will the downloader need to handle?
+
+Should the downloader treat abort and zombie kill events differently?
