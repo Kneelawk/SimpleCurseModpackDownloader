@@ -5,3 +5,5 @@ too. But when a child is canceled only it is canceled.
 What events will the downloader need to handle?
 
 Should the downloader treat abort and zombie kill events differently?
+
+What will the difference between zombie kill and aborts be other than how they will be perceived by the user?
