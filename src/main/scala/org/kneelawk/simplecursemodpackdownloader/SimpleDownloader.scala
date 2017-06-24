@@ -9,6 +9,7 @@ import dispatch.Defaults.executor
 import dispatch.Future
 import dispatch.Http
 import dispatch.enrichFuture
+import org.apache.http.impl.nio.client.HttpAsyncClients
 
 object SimpleDownloader {
   def apply(args: Array[String]) {
@@ -26,6 +27,8 @@ object SimpleDownloader {
       .setFollowRedirect(true)
       .build()
     val client = new Http(new AsyncHttpClient(config))
+    val downloadClient = HttpAsyncClients.createDefault()
+    downloadClient.start()
     try {
       println("Getting mod download...")
       val futDownload = Future({
@@ -49,18 +52,18 @@ object SimpleDownloader {
         if (!outDir.exists()) outDir.mkdirs()
         val outFile = new File(outDir, file.diskFileName)
         println(file.downloadUrl)
-        val fileFut = new Download(outFile, file.downloadUrl)
+        new Download(outFile, file.downloadUrl)
           .onDownloadProgress(progress => println(progress.downloaded + " / " + progress.maxSize))
           .onDownloadError(_.printStackTrace())
-          .start(client)
-        for (a <- fileFut) {
-          println("Done.")
-          client.shutdown()
-        }
-        for (t <- fileFut.failed) {
-          t.printStackTrace()
-          client.shutdown()
-        }
+          .onDownloadError(t => {
+            t.printStackTrace()
+            client.shutdown()
+          })
+          .onDownloadComplete(complete => {
+            println("Done.")
+            client.shutdown()
+          })
+          .start(downloadClient)
       }
     } catch {
       case _: Exception =>

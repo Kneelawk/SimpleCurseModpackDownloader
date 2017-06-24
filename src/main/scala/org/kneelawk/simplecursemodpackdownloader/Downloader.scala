@@ -2,21 +2,27 @@ package org.kneelawk.simplecursemodpackdownloader
 
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.ByteBuffer
 
-import com.ning.http.client.AsyncHandler
-import com.ning.http.client.FluentCaseInsensitiveStringsMap
-import com.ning.http.client.HttpResponseBodyPart
-import com.ning.http.client.HttpResponseHeaders
-import com.ning.http.client.HttpResponseStatus
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.MultiMap
+import scala.collection.mutable.Set
 
-import dispatch.Defaults.executor
-import dispatch.Http
-import dispatch.Req
-import dispatch.{ url => DUrl }
-import scala.concurrent.Future
+import org.apache.http.HttpEntity
+import org.apache.http.HttpResponse
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.entity.ContentType
+import org.apache.http.nio.ContentDecoder
+import org.apache.http.nio.IOControl
+import org.apache.http.nio.client.HttpAsyncClient
+import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer
+import org.apache.http.protocol.HttpContext
+import org.apache.http.nio.client.methods.HttpAsyncMethods
+import org.apache.http.concurrent.FutureCallback
 
 case class DownloadStarted(statusCode: Int, statusText: String)
-case class DownloadHeaders(headers: FluentCaseInsensitiveStringsMap, isTrailing: Boolean)
+case class DownloadHeaders(headers: MultiMap[String, String])
 case class DownloadProgress(maxSize: Long, downloaded: Long)
 case class DownloadComplete(file: File, size: Long)
 
@@ -39,14 +45,15 @@ case class DownloadComplete(file: File, size: Long)
  * }
  * </pre>
  */
-class Download(val file: File, val request: Req) {
+class Download(val file: File, val request: HttpUriRequest) {
   private var downloadStarted: DownloadStarted => Unit = null
   private var downloadHeaders: DownloadHeaders => Unit = null
   private var downloadProgress: DownloadProgress => Unit = null
+  private var downloadComplete: DownloadComplete => Unit = null
   private var downloadError: Throwable => Unit = null
-  
+
   def this(file: File, url: String) {
-    this(file, DUrl(url))
+    this(file, new HttpGet(url))
   }
 
   def onDownloadStarted(callback: DownloadStarted => Unit): Download = {
@@ -64,56 +71,77 @@ class Download(val file: File, val request: Req) {
     this
   }
 
+  def onDownloadComplete(callback: DownloadComplete => Unit): Download = {
+    downloadComplete = callback
+    this
+  }
+
   def onDownloadError(callback: Throwable => Unit): Download = {
     downloadError = callback
     this
   }
 
-  def start(client: Http) = client(request > DownloadOperation)
-  
+  def start(client: HttpAsyncClient): java.util.concurrent.Future[File] = {
+    client.execute(HttpAsyncMethods.create(request), DownloadOperation, new FutureCallback[File] {
+      def cancelled() {}
+      def completed(file: File) {
+        if (downloadComplete != null)
+          downloadComplete(DownloadComplete(file, DownloadOperation.maxSize))
+      }
+      def failed(e: Exception) {
+        if (downloadError != null)
+          downloadError(e)
+      }
+    })
+  }
+
   def listTimeReceived = DownloadOperation.lastTimeReceived
 
-  object DownloadOperation extends AsyncHandler[File] {
+  object DownloadOperation extends AbstractAsyncResponseConsumer[File] {
     val fos = new FileOutputStream(file)
     val channel = fos.getChannel
+    val buf = ByteBuffer.allocate(8192)
 
     var maxSize = -1l
     var downloaded = 0l
     var lastTimeReceived = System.currentTimeMillis()
 
-    def onBodyPartReceived(res: HttpResponseBodyPart): AsyncHandler.STATE = {
-      downloaded += channel.write(res.getBodyByteBuffer)
+    def onContentReceived(cd: ContentDecoder, ioc: IOControl) {
+      buf.clear()
+      while (cd.read(buf) > 0 || buf.position() != 0) {
+        downloaded += buf.position()
+        buf.flip()
+        channel.write(buf)
+        buf.compact()
+      }
       lastTimeReceived = System.currentTimeMillis()
       if (downloadProgress != null)
         downloadProgress(DownloadProgress(maxSize, downloaded))
-      AsyncHandler.STATE.CONTINUE
     }
 
-    def onCompleted(): File = {
-      fos.close()
+    def buildResult(ctx: HttpContext): File = {
       file
     }
 
-    def onHeadersReceived(res: HttpResponseHeaders): AsyncHandler.STATE = {
-      val headers = res.getHeaders
-      maxSize = headers.getFirstValue("Content-Length").toInt
+    def onEntityEnclosed(entity: HttpEntity, ct: ContentType) {
+      maxSize = entity.getContentLength
       downloaded = 0
       lastTimeReceived = System.currentTimeMillis()
-      if (downloadHeaders != null)
-        downloadHeaders(DownloadHeaders(headers, res.isTraillingHeadersReceived()))
-      AsyncHandler.STATE.CONTINUE
     }
 
-    def onStatusReceived(res: HttpResponseStatus): AsyncHandler.STATE = {
-      val code = res.getStatusCode
+    def onResponseReceived(res: HttpResponse) {
+      val code = res.getStatusLine.getStatusCode
+      lastTimeReceived = System.currentTimeMillis()
       if (downloadStarted != null)
-        downloadStarted(DownloadStarted(code, res.getStatusText))
-      if (code / 100 == 2) AsyncHandler.STATE.CONTINUE else AsyncHandler.STATE.ABORT
+        downloadStarted(DownloadStarted(code, res.getStatusLine.getReasonPhrase))
+      if (downloadHeaders != null)
+        downloadHeaders(DownloadHeaders(res.getAllHeaders.foldLeft(
+          new HashMap[String, Set[String]] with MultiMap[String, String])(
+            (acc, header) => acc.addBinding(header.getName.toLowerCase(), header.getValue))))
     }
 
-    def onThrowable(t: Throwable): Unit = {
-      if (downloadError != null)
-        downloadError(t)
+    def releaseResources() {
+      fos.close()
     }
   }
 }

@@ -24,6 +24,7 @@ dependencies {
 	compile 'org.scalafx:scalafx_2.12:8.0.102-R11'
 	compile 'net.databinder.dispatch:dispatch-core_2.12:0.12.0'
 	compile 'net.databinder.dispatch:dispatch-json4s-jackson_2.12:0.12.0'
+	compile 'org.apache.httpcomponents:httpasyncclient:4.1.3'
 }
 
 // builds the launch jar

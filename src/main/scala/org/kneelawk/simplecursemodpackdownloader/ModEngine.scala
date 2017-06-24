@@ -6,11 +6,14 @@ import java.util.concurrent.ExecutionException
 import scala.util.Failure
 import scala.util.Success
 
+import org.apache.http.impl.nio.client.HttpAsyncClients
+import org.apache.http.nio.client.HttpAsyncClient
+import org.kneelawk.simplecursemodpackdownloader.net.RedirectUrlSanitizer
+
 import dispatch.Defaults.executor
 import dispatch.Http
 import dispatch.StatusCode
-import java.net.URL
-import java.net.URI
+import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
 
 /*
  * This file is where the magic happens.
@@ -21,6 +24,11 @@ class ModpackEngine(client: Http, authToken: String, modpack: ModpackManifest,
   import EngineState._
 
   def start {
+    // This is really hacked in
+    val downloadClient = HttpAsyncClients.custom()
+      .setRedirectStrategy(new RedirectUrlSanitizer).build()
+    downloadClient.start()
+
     /*
      * Note: This system doesn't regulate the number of concurrent downloads.
      * This system will likely need to be modified.
@@ -28,7 +36,7 @@ class ModpackEngine(client: Http, authToken: String, modpack: ModpackManifest,
     def engineLoop: EngineState = {
       val numMods = modpack.files.size
       var engines = modpack.files.map(f =>
-        new ModEngine(client, authToken, modpack.minecraft.version, f.projectId,
+        new ModEngine(client, downloadClient, authToken, modpack.minecraft.version, f.projectId,
           f.fileId, modsDir, listener.createModProgressListener(f.projectId, f.fileId)))
       engines.foreach(_.start)
 
@@ -59,13 +67,15 @@ class ModpackEngine(client: Http, authToken: String, modpack: ModpackManifest,
     } else {
       listener.onAllModsComplete
     }
+
+    downloadClient.close()
   }
 }
 
 /**
  * This locates and downloads a file based on project and file ids.
  */
-class ModEngine(client: Http, authToken: String, minecraftVersion: String,
+class ModEngine(client: Http, downloadClient: HttpAsyncClient, authToken: String, minecraftVersion: String,
     projectId: Int, fileId: Int, modsDir: File, listener: ModProgressListener) {
   import EngineState._
 
@@ -81,24 +91,14 @@ class ModEngine(client: Http, authToken: String, minecraftVersion: String,
       futMod.onComplete {
         case Success(mod) => {
           listener.onModResolved(mod)
-          
-          // copied from https://stackoverflow.com/a/8962869/1687581
-          val url = new URL(mod.downloadUrl)
-          val sanitaryUri = new URI(url.getProtocol(), url.getHost(), url.getPath(), url.getRef());
+
+          val sanitaryUri = URIUtil.sanitizeCurseDownloadUri(mod.downloadUrl)
 
           val outFile = new File(modsDir, mod.downloadUrl.replaceAll("^.*\\/", ""))
           val download = new Download(outFile, sanitaryUri.toASCIIString())
             .onDownloadStarted(d => listener.onBeginModDownload)
             .onDownloadProgress(p => listener.onModDownloadProgress(p.downloaded, p.maxSize))
-            .onDownloadError(err => listener.onError(err))
-            .start(client)
-
-          download.onComplete {
-            case Success(f) => {
-              state = Finished
-              listener.onCompletedModDownload
-            }
-            case Failure(err) => {
+            .onDownloadError(err => {
               err match {
                 case t: ExecutionException if t.getCause.isInstanceOf[StatusCode] => {
                   error = err
@@ -116,8 +116,12 @@ class ModEngine(client: Http, authToken: String, minecraftVersion: String,
                   listener.onCrash(err)
                 }
               }
-            }
-          }
+            })
+            .onDownloadComplete(c => {
+              state = Finished
+              listener.onCompletedModDownload
+            })
+            .start(downloadClient)
         }
         case Failure(err) => {
           err match {
