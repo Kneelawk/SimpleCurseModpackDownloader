@@ -1,4 +1,5 @@
 The event bus sends a start signal to its creator.
+When the creator receives the start signal, it is passed a reference to the event bus.
 The event bus can have event listeners registered with it.
 When an event bus receives an event, it notifies all event listeners listening for that type of event.
 Events can be anything, usually case classes.
@@ -14,3 +15,5 @@ You know what possible events can be fired.
 Cons of type-specified event busses:
 Seperate classes for each set of events.
 Requires macros for non-tedious implementation.
+
+This kind of event bus might morph more into a task builder.

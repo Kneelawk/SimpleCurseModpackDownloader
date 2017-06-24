@@ -18,7 +18,7 @@ import scala.reflect.ClassTag
  * Seperate classes for each set of events.
  * Requires macros for non-tedious implementation.
  */
-class UntypedTaskEventBus(task: => Unit) {
+class UntypedTaskEventBus(task: UntypedTaskEventBus => Unit) {
   val listeners = new HashMap[Class[_], Set[EventListener[_]]] with MultiMap[Class[_], EventListener[_]]
 
   def onEvent[EventType](listener: EventType => Unit)(implicit ct: ClassTag[EventType]) {
@@ -34,7 +34,7 @@ class UntypedTaskEventBus(task: => Unit) {
     }
   }
 
-  def startTask = task
+  def startTask = task(this)
 }
 
 class EventListener[EventType: ClassTag](listener: EventType => Unit) {
