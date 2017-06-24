@@ -1,8 +1,8 @@
 package org.kneelawk.simplecursemodpackdownloader
 
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.Set
 import scala.collection.mutable.MultiMap
+import scala.collection.mutable.Set
 import scala.reflect.ClassTag
 
 /*
