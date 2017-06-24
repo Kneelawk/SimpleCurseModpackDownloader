@@ -6,4 +6,4 @@ object InterruptState {
   object ZombieKill extends InterruptState
 }
 
-trait InterruptState
+sealed trait InterruptState
