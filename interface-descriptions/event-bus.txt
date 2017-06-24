@@ -1,0 +1,16 @@
+The event bus sends a start signal to its creator.
+The event bus can have event listeners registered with it.
+When an event bus receives an event, it notifies all event listeners listening for that type of event.
+Events can be anything, usually case classes.
+
+QUESION: Should I try to make sure event busses are type-specified.
+Type-specified event busses would be individual classes for each set of events.
+Type-specified event busses would likely require macros for ease of creation.
+
+Pros of type-specified event busses:
+Event type safety.
+You know what possible events can be fired.
+
+Cons of type-specified event busses:
+Seperate classes for each set of events.
+Requires macros for non-tedious implementation.
