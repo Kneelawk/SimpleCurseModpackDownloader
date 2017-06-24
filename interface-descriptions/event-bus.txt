@@ -3,6 +3,7 @@ When the creator receives the start signal, it is passed a reference to the even
 The event bus can have event listeners registered with it.
 When an event bus receives an event, it notifies all event listeners listening for that type of event.
 Events can be anything, usually case classes.
+Will there be different types of event bus? A task event bus and a normal one?
 
 QUESION: Should I try to make sure event busses are type-specified.
 Type-specified event busses would be individual classes for each set of events.
