@@ -7,3 +7,5 @@ What events will the downloader need to handle?
 Should the downloader treat abort and zombie kill events differently?
 
 What will the difference between zombie kill and aborts be other than how they will be perceived by the user?
+
+Should we have a propagated state system and an interrupt event?
