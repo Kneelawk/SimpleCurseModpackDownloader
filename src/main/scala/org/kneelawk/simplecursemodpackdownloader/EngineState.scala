@@ -7,6 +7,14 @@ package org.kneelawk.simplecursemodpackdownloader
  * Death - means that a fatal error has occurred and anything relying on this process cannot continue.
  */
 
-object EngineState extends Enumeration {
-  val NotStarted, Running, Finished, Crashed, Dead, Abort, ZombieKill = Value
+object EngineState {
+  object NotStarted extends EngineState
+  object Running extends EngineState
+  object Finished extends EngineState
+  object Crashed extends EngineState
+  object Dead extends EngineState
+  object Abort extends EngineState
+  object ZombieKill extends EngineState
 }
+
+sealed trait EngineState

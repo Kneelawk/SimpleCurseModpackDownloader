@@ -25,7 +25,7 @@ class ModpackEngine(client: Http, authToken: String, modpack: ModpackManifest,
      * Note: This system doesn't regulate the number of concurrent downloads.
      * This system will likely need to be modified.
      */
-    def engineLoop: EngineState.Value = {
+    def engineLoop: EngineState = {
       val numMods = modpack.files.size
       var engines = modpack.files.map(f =>
         new ModEngine(client, authToken, modpack.minecraft.version, f.projectId,
@@ -69,7 +69,7 @@ class ModEngine(client: Http, authToken: String, minecraftVersion: String,
     projectId: Int, fileId: Int, modsDir: File, listener: ModProgressListener) {
   import EngineState._
 
-  @volatile var state = NotStarted
+  @volatile var state: EngineState = NotStarted
 
   var error: Throwable = null
 
