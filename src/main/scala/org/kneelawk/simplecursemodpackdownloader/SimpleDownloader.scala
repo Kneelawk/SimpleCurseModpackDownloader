@@ -10,6 +10,7 @@ import dispatch.Future
 import dispatch.Http
 import dispatch.enrichFuture
 import org.apache.http.impl.nio.client.HttpAsyncClients
+import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
 
 object SimpleDownloader {
   def apply(args: Array[String]) {
@@ -52,22 +53,26 @@ object SimpleDownloader {
         if (!outDir.exists()) outDir.mkdirs()
         val outFile = new File(outDir, file.diskFileName)
         println(file.downloadUrl)
-        new Download(outFile, file.downloadUrl)
+        val sanitaryUri = URIUtil.sanitizeCurseDownloadUri(file.downloadUrl, true)
+        new Download(outFile, sanitaryUri.toASCIIString())
           .onDownloadProgress(progress => println(progress.downloaded + " / " + progress.maxSize))
           .onDownloadError(_.printStackTrace())
           .onDownloadError(t => {
             t.printStackTrace()
             client.shutdown()
+            downloadClient.close()
           })
           .onDownloadComplete(complete => {
             println("Done.")
             client.shutdown()
+            downloadClient.close()
           })
           .start(downloadClient)
       }
     } catch {
       case _: Exception =>
         client.shutdown()
+        downloadClient.close()
     }
   }
 }
