@@ -10,27 +10,6 @@ import java.nio.file.StandardCopyOption
 import java.nio.file.LinkOption
 
 object FileUtils {
-  def unzipZip(zip: File): File = {
-    val tempDir = Files.createTempDirectory("cursemodpackdownloader").toFile()
-    tempDir.deleteOnExit()
-    val zis = new ZipInputStream(new FileInputStream(zip))
-    Stream.continually(zis.getNextEntry).takeWhile(_ != null).foreach { entry =>
-      val outFile = new File(tempDir, entry.getName)
-      outFile.deleteOnExit()
-      if (entry.isDirectory()) {
-        outFile.mkdirs()
-      } else {
-        val fos = new FileOutputStream(outFile)
-        val data = new Array[Byte](4096)
-        Stream.continually(zis.read(data)).takeWhile(_ >= 0).foreach(fos.write(data, 0, _))
-        fos.close()
-      }
-      zis.closeEntry()
-    }
-    zis.close()
-    return tempDir
-  }
-
   def copyFile(from: File, to: File, createParents: Boolean) {
     if (createParents && !to.getParentFile.exists())
       to.getParentFile.mkdirs()

@@ -11,6 +11,7 @@ import org.json4s.jvalue2extractable
 import org.json4s.jvalue2monadic
 import org.json4s.stream2JsonInput
 import org.kneelawk.simplecursemodpackdownloader.io.FileUtils
+import org.kneelawk.simplecursemodpackdownloader.io.ZipUtils
 
 case class ModpackManifestMinecraftModLoader(id: String, primary: Boolean)
 case class ModpackManifestMinecraft(version: String, modLoaders: List[ModpackManifestMinecraftModLoader])
@@ -73,7 +74,7 @@ class Modpack(val tmpDir: File, val manifestFile: File, val manifest: ModpackMan
 
 object Modpack {
   def load(modpackZip: File): Modpack = {
-    val tmpDir = FileUtils.unzipZip(modpackZip)
+    val tmpDir = ZipUtils.unzipZip(modpackZip)
     val manifestFile = new File(tmpDir, "manifest.json")
     val manifest = ManifestUtils.getManifest(manifestFile)
     return new Modpack(tmpDir, manifestFile, manifest)
