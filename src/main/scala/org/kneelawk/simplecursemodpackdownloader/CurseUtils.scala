@@ -1,12 +1,27 @@
 package org.kneelawk.simplecursemodpackdownloader
 
-import dispatch._, Defaults._
-import org.json4s._, JsonDSL._, jackson.JsonMethods._
 import java.util.Date
-import java.text.SimpleDateFormat
 import java.util.TimeZone
 import java.util.concurrent.ExecutionException
-import java.io.IOException
+
+import org.apache.commons.lang3.time.FastDateFormat
+import org.json4s.DefaultFormats
+import org.json4s.JValue
+import org.json4s.JsonDSL.pair2Assoc
+import org.json4s.JsonDSL.string2jvalue
+import org.json4s.jackson.JsonMethods.compact
+import org.json4s.jackson.JsonMethods.render
+import org.json4s.jvalue2extractable
+import org.json4s.jvalue2monadic
+
+import dispatch.Defaults.executor
+import dispatch.Future
+import dispatch.Http
+import dispatch.Req
+import dispatch.StatusCode
+import dispatch.as
+import dispatch.implyRequestHandlerTuple
+import dispatch.url
 
 case class UserData(username: String, userId: Int, email: String, authToken: String)
 
@@ -156,11 +171,7 @@ case class NoFileForMinecraftVersionException(minecraftVersion: String)
 object CurseUtils {
   private implicit val formats = DefaultFormats
 
-  val curseDateFormat = {
-    val f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-    f.setTimeZone(TimeZone.getTimeZone("UTC"))
-    f
-  }
+  val curseDateFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss", TimeZone.getTimeZone("UTC"))
 
   val baseReq = url("http://curse-rest-proxy.azurewebsites.net/api")
 
