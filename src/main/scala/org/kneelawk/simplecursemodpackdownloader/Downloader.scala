@@ -20,9 +20,9 @@ import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer
 import org.apache.http.protocol.HttpContext
 import org.apache.http.nio.client.methods.HttpAsyncMethods
 import org.apache.http.concurrent.FutureCallback
+import org.kneelawk.simplecursemodpackdownloader.net.StatusCodeException
 
-case class DownloadStarted(statusCode: Int, statusText: String)
-case class DownloadHeaders(headers: MultiMap[String, String])
+case class DownloadStarted(statusCode: Int, statusText: String, headers: MultiMap[String, String])
 case class DownloadProgress(maxSize: Long, downloaded: Long)
 case class DownloadComplete(file: File, size: Long)
 
@@ -49,7 +49,6 @@ case class DownloadComplete(file: File, size: Long)
 @deprecated
 class Download(val file: File, val request: HttpUriRequest) {
   private var downloadStarted: DownloadStarted => Unit = null
-  private var downloadHeaders: DownloadHeaders => Unit = null
   private var downloadProgress: DownloadProgress => Unit = null
   private var downloadComplete: DownloadComplete => Unit = null
   private var downloadError: Throwable => Unit = null
@@ -60,11 +59,6 @@ class Download(val file: File, val request: HttpUriRequest) {
 
   def onDownloadStarted(callback: DownloadStarted => Unit): Download = {
     downloadStarted = callback
-    this
-  }
-
-  def onDownloadHeaders(callback: DownloadHeaders => Unit): Download = {
-    downloadHeaders = callback
     this
   }
 
@@ -134,12 +128,14 @@ class Download(val file: File, val request: HttpUriRequest) {
     def onResponseReceived(res: HttpResponse) {
       val code = res.getStatusLine.getStatusCode
       lastTimeReceived = System.currentTimeMillis()
+
       if (downloadStarted != null)
-        downloadStarted(DownloadStarted(code, res.getStatusLine.getReasonPhrase))
-      if (downloadHeaders != null)
-        downloadHeaders(DownloadHeaders(res.getAllHeaders.foldLeft(
+        downloadStarted(DownloadStarted(code, res.getStatusLine.getReasonPhrase, res.getAllHeaders.foldLeft(
           new HashMap[String, Set[String]] with MultiMap[String, String])(
             (acc, header) => acc.addBinding(header.getName.toLowerCase(), header.getValue))))
+
+      if (code / 100 != 2)
+        throw new StatusCodeException(code, res.getStatusLine.getReasonPhrase)
     }
 
     def releaseResources() {
