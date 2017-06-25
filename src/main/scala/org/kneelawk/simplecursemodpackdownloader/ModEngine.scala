@@ -17,6 +17,7 @@ import dispatch.Defaults.executor
 import dispatch.Http
 import dispatch.StatusCode
 import org.kneelawk.simplecursemodpackdownloader.net.StatusCodeException
+import org.apache.http.ConnectionClosedException
 
 /*
  * This file is where the magic happens.
@@ -105,6 +106,11 @@ class ModEngine(client: Http, downloadClient: HttpAsyncClient, authToken: String
             .onDownloadError(err => {
               err match {
                 case StatusCodeException(_, _) => {
+                  error = err
+                  state = Dead
+                  listener.onDeath(err)
+                }
+                case _: ConnectionClosedException => {
                   error = err
                   state = Dead
                   listener.onDeath(err)
