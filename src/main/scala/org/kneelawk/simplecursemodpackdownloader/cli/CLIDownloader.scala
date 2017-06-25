@@ -126,8 +126,8 @@ object CLIDownloader {
       // }
     }
 
-    def onCompletedModDownload {
-      println(s"Finished downlading ${m.fileName}")
+    def onCompletedModDownload(size: Long) {
+      println(s"Finished downlading ${size / 1000}kb ${m.fileName}")
     }
 
     def onError(t: Throwable) {

@@ -53,7 +53,7 @@ trait ModProgressListener {
 
   def onModDownloadProgress(current: Long, max: Long)
 
-  def onCompletedModDownload
+  def onCompletedModDownload(size: Long)
 
   def onError(t: Throwable)
 

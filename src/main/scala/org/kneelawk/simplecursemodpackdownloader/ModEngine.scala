@@ -119,7 +119,7 @@ class ModEngine(client: Http, downloadClient: HttpAsyncClient, authToken: String
             })
             .onDownloadComplete(c => {
               state = Finished
-              listener.onCompletedModDownload
+              listener.onCompletedModDownload(c.size)
             })
             .start(downloadClient)
         }
