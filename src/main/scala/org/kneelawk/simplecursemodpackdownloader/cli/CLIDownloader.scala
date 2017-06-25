@@ -83,12 +83,13 @@ object CLIDownloader {
       FileUtils.copyFile(modpack.manifestFile, new File(outDir, "manifest.json"), true)
       FileUtils.copyDir(modpack.overridesDir, outDir)
 
-      println("Downloading files...")
+      println(s"Downloading ${modpack.manifest.files.length} files...")
+
       object ModpackListener extends ModpackProgressListener {
         def createModProgressListener(projectId: Int, fileId: Int) = new ModListener(projectId, fileId)
         def onOverallProgress(current: Long, max: Long) = println(s"## Completed Mod download: $current / $max")
         def onAllModsComplete {
-          println("## Mod Downloads Complete")
+          println(s"## ${modpack.manifest.files.length} Mod Downloads Complete")
           terminate
         }
         def onDeath {
@@ -112,16 +113,17 @@ object CLIDownloader {
     var m: ModFile = null
     var lastProgress = 0l
 
-    def onBeginResolvingMod = println(s"Starting resolve: $projectId")
+    def onBeginResolvingMod {}
 
     def onModResolved(mod: ModFile) = m = mod
 
     def onBeginModDownload = println(s"Starting download: ${m.fileName}")
 
     def onModDownloadProgress(current: Long, max: Long) {
-      if (current > lastProgress + 1000) {
-        println(s"Downloading ${m.fileName} ${current * 100 / max}%")
-      }
+      // TODO: Find better file progress logging system
+      // if (current > lastProgress + 1000) {
+      //   println(s"Downloading ${m.fileName} ${current * 100 / max}%")
+      // }
     }
 
     def onCompletedModDownload {
