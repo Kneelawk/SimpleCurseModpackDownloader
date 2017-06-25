@@ -46,7 +46,7 @@ case class DownloadComplete(file: File, size: Long)
  * </pre>
  * @deprecated This downloader api is falling apart, please await the arrival of the NetworkClient system.
  */
-@deprecated
+@deprecated("This downloader will be phased out and removed", "SimpleCurseModpackDownloader 0.0.2")
 class Download(val file: File, val request: HttpUriRequest) {
   private var downloadStarted: DownloadStarted => Unit = null
   private var downloadProgress: DownloadProgress => Unit = null
