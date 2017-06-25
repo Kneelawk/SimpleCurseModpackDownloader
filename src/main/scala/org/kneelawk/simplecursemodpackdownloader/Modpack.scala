@@ -10,6 +10,7 @@ import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jvalue2extractable
 import org.json4s.jvalue2monadic
 import org.json4s.stream2JsonInput
+import org.kneelawk.simplecursemodpackdownloader.io.FileUtils
 
 case class ModpackManifestMinecraftModLoader(id: String, primary: Boolean)
 case class ModpackManifestMinecraft(version: String, modLoaders: List[ModpackManifestMinecraftModLoader])

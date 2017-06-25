@@ -7,20 +7,20 @@ import scala.util.Failure
 import scala.util.Success
 
 import org.kneelawk.simplecursemodpackdownloader.CurseUtils
-import org.kneelawk.simplecursemodpackdownloader.FileUtils
+import org.kneelawk.simplecursemodpackdownloader.ModFile
+import org.kneelawk.simplecursemodpackdownloader.ModProgressListener
 import org.kneelawk.simplecursemodpackdownloader.Modpack
+import org.kneelawk.simplecursemodpackdownloader.ModpackEngine
+import org.kneelawk.simplecursemodpackdownloader.ModpackProgressListener
 import org.kneelawk.simplecursemodpackdownloader.UserData
 import org.kneelawk.simplecursemodpackdownloader.console.ConsoleInterfaceFactory
+import org.kneelawk.simplecursemodpackdownloader.io.FileUtils
 
 import com.ning.http.client.AsyncHttpClient
 import com.ning.http.client.AsyncHttpClientConfig
 
 import dispatch.Defaults.executor
 import dispatch.Http
-import org.kneelawk.simplecursemodpackdownloader.ModProgressListener
-import org.kneelawk.simplecursemodpackdownloader.ModFile
-import org.kneelawk.simplecursemodpackdownloader.ModpackProgressListener
-import org.kneelawk.simplecursemodpackdownloader.ModpackEngine
 
 object CLIDownloader {
   var client: Http = null

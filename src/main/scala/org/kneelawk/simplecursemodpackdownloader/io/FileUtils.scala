@@ -1,4 +1,4 @@
-package org.kneelawk.simplecursemodpackdownloader
+package org.kneelawk.simplecursemodpackdownloader.io
 
 import java.io.File
 import java.io.FileInputStream
