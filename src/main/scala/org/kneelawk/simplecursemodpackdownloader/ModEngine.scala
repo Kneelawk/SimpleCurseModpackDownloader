@@ -14,6 +14,8 @@ import dispatch.Defaults.executor
 import dispatch.Http
 import dispatch.StatusCode
 import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
+import org.kneelawk.simplecursemodpackdownloader.io.ZipUtils
+import java.io.IOException
 
 /*
  * This file is where the magic happens.
@@ -94,7 +96,8 @@ class ModEngine(client: Http, downloadClient: HttpAsyncClient, authToken: String
 
           val sanitaryUri = URIUtil.sanitizeCurseDownloadUri(mod.downloadUrl)
 
-          val outFile = new File(modsDir, mod.downloadUrl.replaceAll("^.*\\/", ""))
+          val outFileName = mod.downloadUrl.replaceAll("^.*\\/", "")
+          val outFile = new File(modsDir, outFileName)
           val download = new Download(outFile, sanitaryUri.toASCIIString())
             .onDownloadStarted(d => listener.onBeginModDownload)
             .onDownloadProgress(p => listener.onModDownloadProgress(p.downloaded, p.maxSize))
@@ -118,8 +121,16 @@ class ModEngine(client: Http, downloadClient: HttpAsyncClient, authToken: String
               }
             })
             .onDownloadComplete(c => {
-              state = Finished
-              listener.onCompletedModDownload(c.size)
+              val integrityCheck = if (outFileName.endsWith(".jar"))
+                ZipUtils.checkJarIntegrity(outFile)
+              else ZipUtils.checkZipIntegrity(outFile)
+              if (integrityCheck) {
+                state = Finished
+                listener.onCompletedModDownload(c.size)
+              } else {
+                state = Crashed
+                listener.onCrash(new IOException(s"Invalid mod download: $outFileName"))
+              }
             })
             .start(downloadClient)
         }
