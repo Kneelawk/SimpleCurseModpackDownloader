@@ -8,14 +8,14 @@ import scala.util.Success
 
 import org.apache.http.impl.nio.client.HttpAsyncClients
 import org.apache.http.nio.client.HttpAsyncClient
+import org.kneelawk.simplecursemodpackdownloader.io.InvalidModFileException
+import org.kneelawk.simplecursemodpackdownloader.io.ZipUtils
 import org.kneelawk.simplecursemodpackdownloader.net.RedirectUrlSanitizer
+import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
 
 import dispatch.Defaults.executor
 import dispatch.Http
 import dispatch.StatusCode
-import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
-import org.kneelawk.simplecursemodpackdownloader.io.ZipUtils
-import java.io.IOException
 
 /*
  * This file is where the magic happens.
@@ -129,7 +129,8 @@ class ModEngine(client: Http, downloadClient: HttpAsyncClient, authToken: String
                 listener.onCompletedModDownload(c.size)
               } else {
                 state = Crashed
-                listener.onCrash(new IOException(s"Invalid mod download: $outFileName"))
+                listener.onCrash(new InvalidModFileException(s"Invalid mod download: $outFileName"))
+                outFile.delete()
               }
             })
             .start(downloadClient)
