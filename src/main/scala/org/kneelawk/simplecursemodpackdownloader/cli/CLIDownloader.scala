@@ -93,11 +93,11 @@ object CLIDownloader {
           terminate
         }
         def onDeath {
-          println("Fatal error")
+          println("## Fatal error")
           terminate
         }
         def onAbort {
-          println("Download aborted")
+          println("## Download aborted")
           terminate
         }
       }
