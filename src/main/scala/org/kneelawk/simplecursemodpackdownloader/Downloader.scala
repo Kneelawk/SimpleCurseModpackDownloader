@@ -86,7 +86,7 @@ class Download(val file: File, val request: HttpUriRequest) {
       def cancelled() {}
       def completed(file: File) {
         if (downloadComplete != null)
-          downloadComplete(DownloadComplete(file, DownloadOperation.maxSize))
+          downloadComplete(DownloadComplete(file, DownloadOperation.downloaded))
       }
       def failed(e: Exception) {
         if (downloadError != null)
