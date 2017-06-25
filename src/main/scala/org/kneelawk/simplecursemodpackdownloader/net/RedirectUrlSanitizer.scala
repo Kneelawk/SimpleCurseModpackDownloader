@@ -11,7 +11,7 @@ import org.apache.http.util.TextUtils
 class RedirectUrlSanitizer extends DefaultRedirectStrategy {
   override def createLocationURI(location: String): URI = {
     try {
-      val b = new URIBuilder(URIUtil.sanitizeUri(location).normalize())
+      val b = new URIBuilder(URIUtil.sanitizeUri(location, true).normalize())
       val host = b.getHost
       if (host != null) {
         b.setHost(host.toLowerCase(Locale.ROOT))
@@ -20,7 +20,9 @@ class RedirectUrlSanitizer extends DefaultRedirectStrategy {
       if (TextUtils.isEmpty(path)) {
         b.setPath("/")
       }
-      b.build()
+      val uri = b.build()
+      // Potential degugging point?
+      uri
     } catch {
       case ex: URISyntaxException => {
         throw new ProtocolException(s"Invalid redirect URI: $location", ex)

@@ -16,6 +16,7 @@ import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
 import dispatch.Defaults.executor
 import dispatch.Http
 import dispatch.StatusCode
+import org.kneelawk.simplecursemodpackdownloader.net.StatusCodeException
 
 /*
  * This file is where the magic happens.
@@ -94,7 +95,7 @@ class ModEngine(client: Http, downloadClient: HttpAsyncClient, authToken: String
         case Success(mod) => {
           listener.onModResolved(mod)
 
-          val sanitaryUri = URIUtil.sanitizeCurseDownloadUri(mod.downloadUrl)
+          val sanitaryUri = URIUtil.sanitizeCurseDownloadUri(mod.downloadUrl, true)
 
           val outFileName = mod.downloadUrl.replaceAll("^.*\\/", "")
           val outFile = new File(modsDir, outFileName)
@@ -103,12 +104,7 @@ class ModEngine(client: Http, downloadClient: HttpAsyncClient, authToken: String
             .onDownloadProgress(p => listener.onModDownloadProgress(p.downloaded, p.maxSize))
             .onDownloadError(err => {
               err match {
-                case t: ExecutionException if t.getCause.isInstanceOf[StatusCode] => {
-                  error = err
-                  state = Dead
-                  listener.onDeath(err)
-                }
-                case StatusCode(_) => {
+                case StatusCodeException(_, _) => {
                   error = err
                   state = Dead
                   listener.onDeath(err)
