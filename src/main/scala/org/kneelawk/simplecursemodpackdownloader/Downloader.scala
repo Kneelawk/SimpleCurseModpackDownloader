@@ -44,7 +44,9 @@ case class DownloadComplete(file: File, size: Long)
  *     case Failure(thro) => thro.printStackTrace()
  * }
  * </pre>
+ * @deprecated This downloader api is falling apart, please await the arrival of the NetworkClient system.
  */
+@deprecated
 class Download(val file: File, val request: HttpUriRequest) {
   private var downloadStarted: DownloadStarted => Unit = null
   private var downloadHeaders: DownloadHeaders => Unit = null
