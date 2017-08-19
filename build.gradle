@@ -5,6 +5,10 @@ version = '0.0.2'
 
 ext.launcherMain = 'org.kneelawk.simplecursemodpackdownloader.SimpleCurseModpackDownloaderLauncher'
 
+def scalaVersion = '2.12'
+def scalaPatch = '2'
+
+// add CPControl to the launcher sourcepath
 sourceSets {
 	launcher {
 		java {
@@ -14,18 +18,55 @@ sourceSets {
 	}
 }
 
-repositories {
-	jcenter()
-}
+// scala compiler plugin configuration
+configurations { scalaCompiler }
+configurations.scalaCompiler.transitive = false
+
+repositories { jcenter() }
 
 dependencies {
-	compile 'org.scala-lang:scala-library:2.12.1'
-	compile 'org.scala-lang:scala-reflect:2.12.1'
-	compile 'org.scalafx:scalafx_2.12:8.0.102-R11'
-	compile 'net.databinder.dispatch:dispatch-core_2.12:0.12.0'
-	compile 'net.databinder.dispatch:dispatch-json4s-jackson_2.12:0.12.0'
-	compile 'org.apache.httpcomponents:httpasyncclient:4.1.3'
-	compile 'org.apache.commons:commons-lang3:3.6'
+	compile "org.scala-lang:scala-library:$scalaVersion.$scalaPatch"
+	compile "org.scala-lang:scala-reflect:$scalaVersion.$scalaPatch"
+	compile "org.scalafx:scalafx_$scalaVersion:8.0.102-R11"
+	compile "net.databinder.dispatch:dispatch-core_$scalaVersion:0.12.0"
+	compile "net.databinder.dispatch:dispatch-json4s-jackson_$scalaVersion:0.12.0"
+	compile "org.apache.httpcomponents:httpasyncclient:4.1.3"
+	compile "org.apache.commons:commons-lang3:3.6"
+	compile project(':EventSystemMacros')
+
+	// macro paradise
+	scalaCompiler "org.scalamacros:paradise_$scalaVersion.$scalaPatch:2.1.1"
+}
+
+// collect scala compiler plugins and setup options
+def pluginPath = buildPath(configurations.scalaCompiler.files)
+def scalaCompilerOptions = [
+	"-Xplugin:$pluginPath".toString(),
+	"-feature",
+	"-deprecation"
+]
+compileScala.scalaCompileOptions.additionalParameters = scalaCompilerOptions
+
+String buildPath(Set<File> files) {
+	if (files.size() <= 0)
+		return ""
+
+	def res = ""
+	files.each { ":${it.toString()}" }
+	return res
+}
+
+// set eclipse sdt compiler plugins
+task eclipseSdt {
+	doLast {
+		def props = new Properties()
+		def loc = new File(project.projectDir, ".settings/org.scala-ide.sdt.core.prefs")
+		if (loc.exists())
+			props.load(new FileInputStream(loc))
+		props.setProperty("Xplugin", pluginPath)
+		props.setProperty("scala.compiler.useProjectSettings", "true")
+		props.store(new FileOutputStream(loc), null)
+	}
 }
 
 // builds the launch jar
@@ -42,4 +83,5 @@ task launcherJar(type: Jar, dependsOn: [jar, launcherClasses]) {
 	description 'Creates a jar with all dependencies included.'
 }
 
+tasks['eclipse'].dependsOn eclipseSdt
 assemble.dependsOn launcherJar
