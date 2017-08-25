@@ -32,10 +32,6 @@ dependencies {
 	compile "net.databinder.dispatch:dispatch-json4s-jackson_$scalaVersion:0.12.0"
 	compile "org.apache.httpcomponents:httpasyncclient:4.1.3"
 	compile "org.apache.commons:commons-lang3:3.6"
-	compile project(':EventSystemMacros')
-
-	// macro paradise
-	scalaCompiler "org.scalamacros:paradise_$scalaVersion.$scalaPatch:2.1.1"
 }
 
 // collect scala compiler plugins and setup options
