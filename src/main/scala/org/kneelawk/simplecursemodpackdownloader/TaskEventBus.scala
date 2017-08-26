@@ -45,7 +45,7 @@ abstract class TaskEventBus(task: TaskEventBus => Unit, val eventClasses: List[C
   private val listeners = new HashMap[Class[_], Set[EventListener[_]]]
   eventClasses.foreach(listeners.put(_, new HashSet[EventListener[_]]))
 
-  def onEvent[EventType: ClassTag](listener: EventType => Unit) {
+  def register[EventType: ClassTag](listener: EventType => Unit) {
     val cls = implicitly[ClassTag[EventType]].runtimeClass
     var registered = false
     for (key <- listeners.keys; if cls.isAssignableFrom(key)) {
