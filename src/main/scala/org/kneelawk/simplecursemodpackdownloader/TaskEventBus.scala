@@ -41,7 +41,7 @@ import scala.reflect.ClassTag
  * without using macros? HList type parameter? How would I check that a registered event listener was registering
  * for one of the specified events?
  */
-abstract class UntypedTaskEventBus(task: UntypedTaskEventBus => Unit, val eventClasses: List[Class[_]]) {
+abstract class TaskEventBus(task: TaskEventBus => Unit, val eventClasses: List[Class[_]]) {
   private val listeners = new HashMap[Class[_], Set[EventListener[_]]]
   eventClasses.foreach(listeners.put(_, new HashSet[EventListener[_]]))
 
