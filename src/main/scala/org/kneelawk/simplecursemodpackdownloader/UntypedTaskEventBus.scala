@@ -1,7 +1,7 @@
 package org.kneelawk.simplecursemodpackdownloader
 
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.MultiMap
+import scala.collection.mutable.HashSet
 import scala.collection.mutable.Set
 import scala.reflect.ClassTag
 
@@ -36,21 +36,39 @@ import scala.reflect.ClassTag
  * Use a base class for all events?
  * 
  * I don't think this would need a base class for all events. Trait events???
+ * 
+ * Question: Is there a way to build this class so it relies on compile time checks rather than run time ones
+ * without using macros? HList type parameter? How would I check that a registered event listener was registering
+ * for one of the specified events?
  */
-class UntypedTaskEventBus(task: UntypedTaskEventBus => Unit) {
-  val listeners = new HashMap[Class[_], Set[EventListener[_]]] with MultiMap[Class[_], EventListener[_]]
+abstract class UntypedTaskEventBus(task: UntypedTaskEventBus => Unit, val eventClasses: List[Class[_]]) {
+  private val listeners = new HashMap[Class[_], Set[EventListener[_]]]
+  eventClasses.foreach(listeners.put(_, new HashSet[EventListener[_]]))
 
   def onEvent[EventType: ClassTag](listener: EventType => Unit) {
-    listeners.addBinding(implicitly[ClassTag[EventType]].runtimeClass, new EventListener[EventType](listener))
+    val cls = implicitly[ClassTag[EventType]].runtimeClass
+    var registered = false
+    for (key <- listeners.keys; if cls.isAssignableFrom(key)) {
+      listeners(key) += new EventListener[EventType](listener)
+      registered = true
+    }
+    if (!registered)
+      throw new UnsupportedOperationException(cls.getName + " is neither one of this event bus's event types nor is it a super class of one")
   }
 
   def sendEvent(event: AnyRef) {
     val eventClass = event.getClass
-    if (listeners.contains(eventClass)) {
-      for (listener <- listeners.get(eventClass).get) {
-        listener(event)
+    val foundListeners = new HashSet[EventListener[_]]
+    var foundClasses = false
+    for (key <- listeners.keys; if key.isAssignableFrom(eventClass)) {
+      for (listener <- listeners(key)) {
+        foundListeners += listener
       }
+      foundClasses = true
     }
+    if (!foundClasses)
+      throw new UnsupportedOperationException(event.getClass.getName + " is too generic an event for this event bus")
+    foundListeners.foreach(_(event))
   }
 
   def startTask = task(this)
