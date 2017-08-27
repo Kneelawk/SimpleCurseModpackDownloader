@@ -40,6 +40,8 @@ import scala.reflect.ClassTag
  * Question: Is there a way to build this class so it relies on compile time checks rather than run time ones
  * without using macros? HList type parameter? How would I check that a registered event listener was registering
  * for one of the specified events?
+ * 
+ * Should I use a list of event classes as a constructor arg, or should I have a type parameter that expects a tuple?
  */
 abstract class TaskEventBus(task: TaskEventBus => Unit, val eventClasses: List[Class[_]]) {
   private val listeners = new HashMap[Class[_], Set[EventListener[_]]]
