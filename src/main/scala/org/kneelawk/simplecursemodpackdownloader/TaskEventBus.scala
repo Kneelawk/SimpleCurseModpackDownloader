@@ -58,6 +58,8 @@ abstract class TaskEventBus(task: TaskEventBus => Unit, val eventClasses: List[C
 
   def sendEvent(event: AnyRef) {
     val eventClass = event.getClass
+    
+    // This set could be used for sorting listener priorities in the future
     val foundListeners = new HashSet[EventListener[_]]
     var foundClasses = false
     for (key <- listeners.keys; if key.isAssignableFrom(eventClass)) {
