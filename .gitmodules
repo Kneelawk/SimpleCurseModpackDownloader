@@ -1,6 +1,3 @@
 [submodule "CPControl"]
 	path = CPControl
 	url = git@github.com:Kneelawk/CPControl.git
-[submodule "EventSystemMacros"]
-	path = EventSystemMacros
-	url = git@github.com:Kneelawk/EventSystemMacros.git
