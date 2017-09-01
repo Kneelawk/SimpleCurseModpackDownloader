@@ -3,7 +3,7 @@ package org.kneelawk.simplecursemodpackdownloader
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.Set
-import scala.reflect.ClassTag
+import scala.reflect.runtime.{ universe => ru } // to work around annoying eclipse import organization bug
 
 /*
  * QUESION: Should I try to make sure event busses are type-specified.
@@ -43,28 +43,30 @@ import scala.reflect.ClassTag
  * 
  * Should I use a list of event classes as a constructor arg, or should I have a type parameter that expects a tuple?
  */
-abstract class TaskEventBus(task: TaskEventBus => Unit, val eventClasses: List[Class[_]]) {
-  private val listeners = new HashMap[Class[_], Set[EventListener[_]]]
+abstract class TaskEventBus(val eventClasses: List[ru.Type]) {
+  private val listeners = new HashMap[ru.Type, Set[EventListener[_]]]
   eventClasses.foreach(listeners.put(_, new HashSet[EventListener[_]]))
 
-  def register[EventType: ClassTag](listener: EventType => Unit) {
-    val cls = implicitly[ClassTag[EventType]].runtimeClass
+  def register[EventType: ru.TypeTag](listener: EventType => Unit): TaskEventBus = {
+    val tpe = ru.typeOf[EventType]
     var registered = false
-    for (key <- listeners.keys; if cls.isAssignableFrom(key)) {
+    for (key <- listeners.keys; if key <:< tpe) {
       listeners(key) += new EventListener[EventType](listener)
       registered = true
     }
     if (!registered)
-      throw new UnsupportedOperationException(cls.getName + " is neither one of this event bus's event types nor is it a super class of one")
+      throw new UnsupportedOperationException(tpe.toString() + " is neither one of this event bus's event types nor is it a super class of one")
+
+    return this
   }
 
-  def sendEvent(event: AnyRef) {
-    val eventClass = event.getClass
-    
+  def sendEvent[EventType: ru.TypeTag](event: AnyRef) {
+    val tpe = ru.typeOf[EventType]
+
     // This set could be used for sorting listener priorities in the future
     val foundListeners = new HashSet[EventListener[_]]
     var foundClasses = false
-    for (key <- listeners.keys; if key.isAssignableFrom(eventClass)) {
+    for (key <- listeners.keys; if tpe <:< key) {
       for (listener <- listeners(key)) {
         foundListeners += listener
       }
@@ -75,10 +77,12 @@ abstract class TaskEventBus(task: TaskEventBus => Unit, val eventClasses: List[C
     foundListeners.foreach(_(event))
   }
 
-  def startTask = task(this)
+  def startTask = task
+
+  protected def task
 }
 
-class EventListener[EventType: ClassTag](listener: EventType => Unit) {
+class EventListener[EventType: ru.TypeTag](listener: EventType => Unit) {
   def apply(event: AnyRef) {
     listener(event.asInstanceOf[EventType])
   }
