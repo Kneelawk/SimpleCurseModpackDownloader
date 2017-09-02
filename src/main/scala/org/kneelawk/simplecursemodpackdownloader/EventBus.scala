@@ -42,6 +42,11 @@ import scala.reflect.runtime.{ universe => ru } // to work around annoying eclip
  * for one of the specified events?
  * 
  * Should I use a list of event classes as a constructor arg, or should I have a type parameter that expects a tuple?
+ * 
+ * Btw, now that we are working on an actual task system, EventBusses should only hand the event bus stuff.
+ * 
+ * Is there any way we can make EventBusses into a trait without using macros?
+ * They would be really handy things to tack onto TaskBuilders.
  */
 abstract class EventBus(val eventClasses: List[ru.Type]) {
   private val listeners = new HashMap[ru.Type, Set[EventListener[_]]]
