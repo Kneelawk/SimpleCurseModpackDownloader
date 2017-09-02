@@ -51,6 +51,7 @@ import scala.reflect.runtime.{ universe => ru } // to work around annoying eclip
  * Another thought, should EventBusses be their own objects? (not designed to be superclasses)
  * Especially, cause you might not want to hang onto a builder, but you might want to hang onto an EventBus.
  * Passing EventBusses around would mean that they would need to be typed.
+ * Honestly, I'm not sure you'd want to hang onto an event buss either.
  */
 abstract class EventBus(val eventClasses: List[ru.Type]) {
   private val listeners = new HashMap[ru.Type, Set[EventListener[_]]]
