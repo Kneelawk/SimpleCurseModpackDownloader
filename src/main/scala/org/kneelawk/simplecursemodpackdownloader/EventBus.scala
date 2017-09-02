@@ -47,6 +47,10 @@ import scala.reflect.runtime.{ universe => ru } // to work around annoying eclip
  * 
  * Is there any way we can make EventBusses into a trait without using macros?
  * They would be really handy things to tack onto TaskBuilders.
+ * 
+ * Another thought, should EventBusses be their own objects? (not designed to be superclasses)
+ * Especially, cause you might not want to hang onto a builder, but you might want to hang onto an EventBus.
+ * Passing EventBusses around would mean that they would need to be typed.
  */
 abstract class EventBus(val eventClasses: List[ru.Type]) {
   private val listeners = new HashMap[ru.Type, Set[EventListener[_]]]
