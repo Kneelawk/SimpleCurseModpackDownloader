@@ -1,7 +1,7 @@
 package org.kneelawk.simplecursemodpackdownloader.net
 
 import scala.collection.mutable.MultiMap
-import org.kneelawk.simplecursemodpackdownloader.TaskEventBus
+import org.kneelawk.simplecursemodpackdownloader.EventBus
 import org.kneelawk.simplecursemodpackdownloader.Task
 import org.kneelawk.simplecursemodpackdownloader.EngineState
 import org.kneelawk.simplecursemodpackdownloader.InterruptState
@@ -22,4 +22,5 @@ class DownloadTask extends Task {
   def getLastUpdateTime: Long = ???
   def getState: EngineState = ???
   def interrupt(state: InterruptState): Unit = ???
+  def startTask: Unit = ???
 }

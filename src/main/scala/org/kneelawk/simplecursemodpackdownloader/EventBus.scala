@@ -43,11 +43,11 @@ import scala.reflect.runtime.{ universe => ru } // to work around annoying eclip
  * 
  * Should I use a list of event classes as a constructor arg, or should I have a type parameter that expects a tuple?
  */
-abstract class TaskEventBus(val eventClasses: List[ru.Type]) {
+abstract class EventBus(val eventClasses: List[ru.Type]) {
   private val listeners = new HashMap[ru.Type, Set[EventListener[_]]]
   eventClasses.foreach(listeners.put(_, new HashSet[EventListener[_]]))
 
-  def register[EventType: ru.TypeTag](listener: EventType => Unit): TaskEventBus = {
+  def register[EventType: ru.TypeTag](listener: EventType => Unit): EventBus = {
     val tpe = ru.typeOf[EventType]
     var registered = false
     for (key <- listeners.keys; if key <:< tpe) {
@@ -76,10 +76,6 @@ abstract class TaskEventBus(val eventClasses: List[ru.Type]) {
       throw new UnsupportedOperationException(event.getClass.getName + " is too generic an event for this event bus")
     foundListeners.foreach(_(event))
   }
-
-  def startTask = task
-
-  protected def task
 }
 
 class EventListener[EventType: ru.TypeTag](listener: EventType => Unit) {

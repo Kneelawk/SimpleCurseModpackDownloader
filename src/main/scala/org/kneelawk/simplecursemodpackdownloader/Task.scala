@@ -30,4 +30,9 @@ trait Task {
    *  This is for zombie identification
    */
   def getLastUpdateTime: Long
+  
+  /** Starts the task once everything is set up.
+   *  
+   */
+  def startTask
 }
