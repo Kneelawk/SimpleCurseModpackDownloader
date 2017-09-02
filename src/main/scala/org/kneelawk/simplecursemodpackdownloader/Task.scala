@@ -13,6 +13,7 @@ package org.kneelawk.simplecursemodpackdownloader
  * No, we need to have unified TaskContexts for each aspect of the context.
  * So an HttpContext would house the apache HttpClient and builders would just require appropriate contexts
  * in their constructors.
+ * Do I need a trait for TaskContexts? Or should I just have various TaskBuilders require various Contexts?
  */
 
 /** A trait of common methods for all tasks.
