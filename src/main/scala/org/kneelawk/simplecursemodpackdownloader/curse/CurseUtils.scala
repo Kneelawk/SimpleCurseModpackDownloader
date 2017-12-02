@@ -1,4 +1,4 @@
-package org.kneelawk.simplecursemodpackdownloader
+package org.kneelawk.simplecursemodpackdownloader.curse
 
 import java.util.Date
 import java.util.TimeZone
