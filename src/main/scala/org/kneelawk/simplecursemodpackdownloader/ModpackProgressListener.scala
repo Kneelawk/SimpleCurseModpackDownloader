@@ -1,5 +1,7 @@
 package org.kneelawk.simplecursemodpackdownloader
 
+import org.kneelawk.simplecursemodpackdownloader.curse.ModFile
+
 /*
  * Structure thoughts:
  * Single ProgressListener is for all files?

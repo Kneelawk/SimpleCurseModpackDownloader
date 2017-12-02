@@ -1,6 +1,6 @@
 package org.kneelawk.simplecursemodpackdownloader.logintest
 
-import org.kneelawk.simplecursemodpackdownloader.CurseUtils
+import org.kneelawk.simplecursemodpackdownloader.curse.CurseUtils
 
 import com.ning.http.client.AsyncHttpClient
 import com.ning.http.client.AsyncHttpClientConfig

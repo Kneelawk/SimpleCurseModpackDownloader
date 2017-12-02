@@ -6,18 +6,20 @@ import java.util.concurrent.ExecutionException
 import scala.util.Failure
 import scala.util.Success
 
+import org.apache.http.ConnectionClosedException
 import org.apache.http.impl.nio.client.HttpAsyncClients
 import org.apache.http.nio.client.HttpAsyncClient
+import org.kneelawk.simplecursemodpackdownloader.curse.CurseUtils
+import org.kneelawk.simplecursemodpackdownloader.curse.NoFileForMinecraftVersionException
 import org.kneelawk.simplecursemodpackdownloader.io.InvalidModFileException
 import org.kneelawk.simplecursemodpackdownloader.io.ZipUtils
 import org.kneelawk.simplecursemodpackdownloader.net.RedirectUrlSanitizer
+import org.kneelawk.simplecursemodpackdownloader.net.StatusCodeException
 import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
 
 import dispatch.Defaults.executor
 import dispatch.Http
 import dispatch.StatusCode
-import org.kneelawk.simplecursemodpackdownloader.net.StatusCodeException
-import org.apache.http.ConnectionClosedException
 
 /*
  * This file is where the magic happens.

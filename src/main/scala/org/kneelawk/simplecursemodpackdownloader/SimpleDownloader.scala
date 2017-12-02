@@ -2,6 +2,10 @@ package org.kneelawk.simplecursemodpackdownloader
 
 import java.io.File
 
+import org.apache.http.impl.nio.client.HttpAsyncClients
+import org.kneelawk.simplecursemodpackdownloader.curse.CurseUtils
+import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
+
 import com.ning.http.client.AsyncHttpClient
 import com.ning.http.client.AsyncHttpClientConfig
 
@@ -9,8 +13,6 @@ import dispatch.Defaults.executor
 import dispatch.Future
 import dispatch.Http
 import dispatch.enrichFuture
-import org.apache.http.impl.nio.client.HttpAsyncClients
-import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
 
 object SimpleDownloader {
   def apply(args: Array[String]) {
