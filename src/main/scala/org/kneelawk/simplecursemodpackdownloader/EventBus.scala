@@ -42,12 +42,22 @@ import scala.reflect.runtime.{ universe => ru } // to work around annoying eclip
  * for one of the specified events?
  * 
  * Should I use a list of event classes as a constructor arg, or should I have a type parameter that expects a tuple?
+ * 
+ * Btw, now that we are working on an actual task system, EventBusses should only hand the event bus stuff.
+ * 
+ * Is there any way we can make EventBusses into a trait without using macros?
+ * They would be really handy things to tack onto TaskBuilders.
+ * 
+ * Another thought, should EventBusses be their own objects? (not designed to be superclasses)
+ * Especially, cause you might not want to hang onto a builder, but you might want to hang onto an EventBus.
+ * Passing EventBusses around would mean that they would need to be typed.
+ * Honestly, I'm not sure you'd want to hang onto an event buss either.
  */
-abstract class TaskEventBus(val eventClasses: List[ru.Type]) {
+abstract class EventBus(val eventClasses: List[ru.Type]) {
   private val listeners = new HashMap[ru.Type, Set[EventListener[_]]]
   eventClasses.foreach(listeners.put(_, new HashSet[EventListener[_]]))
 
-  def register[EventType: ru.TypeTag](listener: EventType => Unit): TaskEventBus = {
+  def register[EventType: ru.TypeTag](listener: EventType => Unit): EventBus = {
     val tpe = ru.typeOf[EventType]
     var registered = false
     for (key <- listeners.keys; if key <:< tpe) {
@@ -76,10 +86,6 @@ abstract class TaskEventBus(val eventClasses: List[ru.Type]) {
       throw new UnsupportedOperationException(event.getClass.getName + " is too generic an event for this event bus")
     foundListeners.foreach(_(event))
   }
-
-  def startTask = task
-
-  protected def task
 }
 
 class EventListener[EventType: ru.TypeTag](listener: EventType => Unit) {

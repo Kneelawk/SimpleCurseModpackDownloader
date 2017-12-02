@@ -3,6 +3,17 @@ package org.kneelawk.simplecursemodpackdownloader
 /*
  * Tasks be hierarchical.
  * Task factories create tasks of different types.
+ * 
+ * Should there be TaskBuilders and TaskContexts?
+ * A TaskBuilder would be responsible for initializing a task, taking settings, and notifying parent tasks.
+ * Does that mean that the TaskBuilder and the EventBus would be integratable?
+ * A TaskContext would be responsible for building the TaskBuilder and supplying it with persistent
+ * context variables (things like an apache HttpClient)
+ * 
+ * No, we need to have unified TaskContexts for each aspect of the context.
+ * So an HttpContext would house the apache HttpClient and builders would just require appropriate contexts
+ * in their constructors.
+ * Do I need a trait for TaskContexts? Or should I just have various TaskBuilders require various Contexts?
  */
 
 /** A trait of common methods for all tasks.
@@ -30,4 +41,9 @@ trait Task {
    *  This is for zombie identification
    */
   def getLastUpdateTime: Long
+  
+  /** Starts the task once everything is set up.
+   *  
+   */
+  def startTask
 }
