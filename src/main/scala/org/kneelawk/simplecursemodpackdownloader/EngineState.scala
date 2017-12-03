@@ -11,10 +11,12 @@ object EngineState {
   object NotStarted extends EngineState
   object Running extends EngineState
   object Finished extends EngineState
-  object Crashed extends EngineState
+  object Crashed extends EngineState with RestartableEngineState
   object Dead extends EngineState
   object Abort extends EngineState
-  object ZombieKill extends EngineState
+  object ZombieKill extends EngineState with RestartableEngineState
 }
 
 sealed trait EngineState
+
+sealed trait RestartableEngineState extends EngineState
