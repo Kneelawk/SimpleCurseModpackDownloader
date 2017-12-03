@@ -57,7 +57,7 @@ abstract class EventBus(val eventClasses: List[ru.Type]) {
   private val listeners = new HashMap[ru.Type, Set[EventListener[_]]]
   eventClasses.foreach(listeners.put(_, new HashSet[EventListener[_]]))
 
-  def register[EventType: ru.TypeTag](listener: EventType => Unit): EventBus = {
+  def register[EventType: ru.TypeTag](listener: EventType => Unit): this.type = {
     val tpe = ru.typeOf[EventType]
     var registered = false
     for (key <- listeners.keys; if key <:< tpe) {
@@ -70,7 +70,7 @@ abstract class EventBus(val eventClasses: List[ru.Type]) {
     return this
   }
 
-  def sendEvent[EventType: ru.TypeTag](event: AnyRef) {
+  def sendEvent[EventType <: AnyRef: ru.TypeTag](event: EventType) {
     val tpe = ru.typeOf[EventType]
 
     // This set could be used for sorting listener priorities in the future
@@ -83,7 +83,7 @@ abstract class EventBus(val eventClasses: List[ru.Type]) {
       foundClasses = true
     }
     if (!foundClasses)
-      throw new UnsupportedOperationException(event.getClass.getName + " is too generic an event for this event bus")
+      throw new UnsupportedOperationException(tpe + " is too generic an event for this event bus")
     foundListeners.foreach(_(event))
   }
 }
