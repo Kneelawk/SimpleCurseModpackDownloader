@@ -30,6 +30,7 @@ dependencies {
 	compile "org.scalafx:scalafx_$scalaVersion:8.0.102-R11"
 	compile "net.databinder.dispatch:dispatch-core_$scalaVersion:0.12.0"
 	compile "net.databinder.dispatch:dispatch-json4s-jackson_$scalaVersion:0.12.0"
+	// compile "org.json4s:json4s-jackson_$scalaVersion:3.6.0-M2"
 	compile "org.apache.httpcomponents:httpasyncclient:4.1.3"
 	compile "org.apache.commons:commons-lang3:3.6"
 	
