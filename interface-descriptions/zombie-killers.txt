@@ -9,3 +9,9 @@ state set to crashed/zombie killed when startTask() was called so it could be ab
 
 This would mean that any corruptible resources should only be created once startTask() has been called and should be cleaned
 up when the task is interrupted.
+
+What about when a task crashes? Should it's parent be responsible for handling that? Or should the parent invoke a helper
+utility for handing the restarting crashable/killable tasks? This would mean that all a zombie killer would be need for
+would be killing the zombie task and then leaving it up to the tasks parent (and invoked utility) to restart it if needed.
+
+Would it be necessary for a task to be rebuilt when it's restarted?
