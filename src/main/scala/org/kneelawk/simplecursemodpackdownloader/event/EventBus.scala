@@ -1,4 +1,4 @@
-package org.kneelawk.simplecursemodpackdownloader
+package org.kneelawk.simplecursemodpackdownloader.event
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet

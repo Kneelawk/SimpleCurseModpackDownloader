@@ -1,7 +1,7 @@
 package org.kneelawk.simplecursemodpackdownloader.net
 
 import scala.collection.mutable.MultiMap
-import org.kneelawk.simplecursemodpackdownloader.EventBus
+import org.kneelawk.simplecursemodpackdownloader.event.EventBus
 import org.kneelawk.simplecursemodpackdownloader.Task
 import org.kneelawk.simplecursemodpackdownloader.EngineState
 import org.kneelawk.simplecursemodpackdownloader.InterruptState
