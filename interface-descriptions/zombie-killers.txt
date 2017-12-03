@@ -1,0 +1,11 @@
+How should zombie killers work.
+Should there be one zombie killer that goes through a giant list of all running tasks
+and kills any unresponsive ones? If so, should the zombie killer be responsibile for restarting them?
+How would a restarted task behave? Would it be able to know about it's parents? Would it need to clean up resources?
+Would restarting a killed zombie task be as easy as calling startTask() on it after it had been interrupted?
+Should tasks have a specialized method called restartTask() for restarting crashed or zombie tasks? This method
+could possible just call startTask() by default unless overridden. Granted, a crashed or killed zombie task would have its
+state set to crashed/zombie killed when startTask() was called so it could be able to tell from that.
+
+This would mean that any corruptible resources should only be created once startTask() has been called and should be cleaned
+up when the task is interrupted.
