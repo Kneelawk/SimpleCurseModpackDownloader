@@ -5,6 +5,7 @@ import org.kneelawk.simplecursemodpackdownloader.event.EventBus
 import org.kneelawk.simplecursemodpackdownloader.task.Task
 import org.kneelawk.simplecursemodpackdownloader.EngineState
 import org.kneelawk.simplecursemodpackdownloader.InterruptState
+import org.kneelawk.simplecursemodpackdownloader.task.AbstractTask
 
 /**
  * Event sent when the download starts
@@ -17,10 +18,12 @@ case class DownloadProgressEvent(current: Long, max: Long)
 class DownloaderClient extends NetworkClient {
 }
 
-class DownloadTask extends Task {
-  def addChild(child: Task): Unit = ???
-  def getLastUpdateTime: Long = ???
-  def getState: EngineState = ???
-  def interrupt(state: InterruptState): Unit = ???
-  def startTask: Unit = ???
+class DownloadTask extends AbstractTask {
+  protected def onInterrupt(state: InterruptState) {
+    
+  }
+  
+  def startTask() {
+    
+  }
 }
