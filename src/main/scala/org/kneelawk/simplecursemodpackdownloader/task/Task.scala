@@ -1,4 +1,7 @@
-package org.kneelawk.simplecursemodpackdownloader
+package org.kneelawk.simplecursemodpackdownloader.task
+
+import org.kneelawk.simplecursemodpackdownloader.EngineState
+import org.kneelawk.simplecursemodpackdownloader.InterruptState
 
 /*
  * Tasks be hierarchical.

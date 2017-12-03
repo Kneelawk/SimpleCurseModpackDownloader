@@ -1,4 +1,4 @@
-package org.kneelawk.simplecursemodpackdownloader
+package org.kneelawk.simplecursemodpackdownloader.task
 
 trait TaskBuilder {
   /** Used for setting the task's parent
