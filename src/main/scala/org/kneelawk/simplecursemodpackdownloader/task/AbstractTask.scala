@@ -1,8 +1,6 @@
 package org.kneelawk.simplecursemodpackdownloader.task
 
 import scala.collection.mutable.ListBuffer
-import org.kneelawk.simplecursemodpackdownloader.EngineState
-import org.kneelawk.simplecursemodpackdownloader.InterruptState
 
 abstract class AbstractTask extends Task {
   protected val children = new ListBuffer[Task]

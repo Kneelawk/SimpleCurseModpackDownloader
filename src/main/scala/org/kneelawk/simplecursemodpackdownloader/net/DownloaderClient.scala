@@ -3,8 +3,8 @@ package org.kneelawk.simplecursemodpackdownloader.net
 import scala.collection.mutable.MultiMap
 import org.kneelawk.simplecursemodpackdownloader.event.EventBus
 import org.kneelawk.simplecursemodpackdownloader.task.Task
-import org.kneelawk.simplecursemodpackdownloader.EngineState
-import org.kneelawk.simplecursemodpackdownloader.InterruptState
+import org.kneelawk.simplecursemodpackdownloader.task.EngineState
+import org.kneelawk.simplecursemodpackdownloader.task.InterruptState
 import org.kneelawk.simplecursemodpackdownloader.task.AbstractTask
 
 /**

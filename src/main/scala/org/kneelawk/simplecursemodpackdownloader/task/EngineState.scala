@@ -1,4 +1,4 @@
-package org.kneelawk.simplecursemodpackdownloader
+package org.kneelawk.simplecursemodpackdownloader.task
 
 /*
  * Error terminology:

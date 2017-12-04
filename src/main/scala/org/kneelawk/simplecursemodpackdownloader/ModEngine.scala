@@ -16,6 +16,7 @@ import org.kneelawk.simplecursemodpackdownloader.io.ZipUtils
 import org.kneelawk.simplecursemodpackdownloader.net.RedirectUrlSanitizer
 import org.kneelawk.simplecursemodpackdownloader.net.StatusCodeException
 import org.kneelawk.simplecursemodpackdownloader.net.URIUtil
+import org.kneelawk.simplecursemodpackdownloader.task.EngineState
 
 import dispatch.Defaults.executor
 import dispatch.Http
