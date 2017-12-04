@@ -18,7 +18,7 @@ case class DownloadProgressEvent(current: Long, max: Long)
 class DownloaderClient extends NetworkClient {
 }
 
-class DownloadTask extends AbstractTask {
+class DownloadTask(eventBus: EventBus) extends AbstractTask(eventBus) {
   protected def onInterrupt(state: InterruptState) {
     
   }
