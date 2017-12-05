@@ -45,5 +45,5 @@ trait Task {
   /** Starts the task once everything is set up.
    *  
    */
-  def startTask()
+  def start()
 }

@@ -7,8 +7,8 @@ trait TaskBuilder {
    */
   def setParent(parent: Task)
   
-  /** Builds and starts the task
+  /** Builds the task
    *  
    */
-  def startTask: Task
+  def build(): Task
 }
