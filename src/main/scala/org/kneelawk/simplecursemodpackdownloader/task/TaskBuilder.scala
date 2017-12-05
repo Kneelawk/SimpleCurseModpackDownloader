@@ -5,7 +5,7 @@ trait TaskBuilder {
    *  
    * This is important for hierarchical tasks.
    */
-  def setParent(parent: Task)
+  def setParent(parent: Task): this.type
   
   /** Builds the task
    *  
