@@ -1,0 +1,16 @@
+How do tasks work?
+
+Tasks are hierarchical. Sending an interrupt signal to a task sends it to all its children.
+That means that it needs to keep a list of all it's children.
+
+How should it know when a child has finished or died, so it can remove it from its list?
+
+Should there be task state change events?
+That would mean that every event bus for a task should be able to handle the state change event.
+It also means that a task would have to be able to register a listener for those state change events when it was added.
+That either means that tasks themselves should have a way to register listeners or that you can only add a task builder
+to a parent task and the task builder must have a way to register events.
+
+I think I like having all task builders handle events. I also kind of like the idea of adding a task builder to a parent
+task being the way to start that task builder's task. I think there would be some problems though. I remember there was
+a reason i liked having the builders do their thing and not relying on the parent so much.
