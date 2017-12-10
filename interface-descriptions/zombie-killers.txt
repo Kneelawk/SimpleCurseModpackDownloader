@@ -15,3 +15,5 @@ utility for handing the restarting crashable/killable tasks? This would mean tha
 would be killing the zombie task and then leaving it up to the tasks parent (and invoked utility) to restart it if needed.
 
 Would it be necessary for a task to be rebuilt when it's restarted?
+
+Zombie killers should be just things that go through task manifests and kill zombie ones.
