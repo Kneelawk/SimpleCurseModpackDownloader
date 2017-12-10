@@ -10,13 +10,14 @@ package org.kneelawk.simplecursemodpackdownloader.task
 object EngineState {
   object NotStarted extends EngineState
   object Running extends EngineState
-  object Finished extends EngineState
+  object Finished extends EngineState with StoppedEngineState
   object Crashed extends EngineState with RestartableEngineState
-  object Dead extends EngineState
-  object Abort extends EngineState
+  object Dead extends EngineState with StoppedEngineState
+  object Abort extends EngineState with StoppedEngineState
   object ZombieKill extends EngineState with RestartableEngineState
 }
 
 sealed trait EngineState
 
 sealed trait RestartableEngineState extends EngineState
+sealed trait StoppedEngineState extends EngineState
