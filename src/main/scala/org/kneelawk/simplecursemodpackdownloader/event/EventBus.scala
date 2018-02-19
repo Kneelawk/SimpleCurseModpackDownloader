@@ -4,6 +4,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.Set
 import scala.reflect.runtime.{ universe => ru } // to work around annoying eclipse import organization bug
+import scala.collection.mutable.MultiMap
 
 /*
  * QUESION: Should I try to make sure event busses are type-specified.
@@ -52,20 +53,18 @@ import scala.reflect.runtime.{ universe => ru } // to work around annoying eclip
  * Especially, cause you might not want to hang onto a builder, but you might want to hang onto an EventBus.
  * Passing EventBusses around would mean that they would need to be typed.
  * Honestly, I'm not sure you'd want to hang onto an event buss either.
+ * 
+ * Looks like it's getting too tricky to specify the types an event bus can handle ahead of time.
+ * I'm making event busses untyped.
  */
-abstract class EventBus(val eventClasses: List[ru.Type]) {
-  private val listeners = new HashMap[ru.Type, Set[EventListener[_]]]
-  eventClasses.foreach(listeners.put(_, new HashSet[EventListener[_]]))
+abstract class EventBus() {
+  private val listeners = new HashMap[ru.Type, Set[EventListener[_]]] with MultiMap[ru.Type, EventListener[_]]
 
   def register[EventType: ru.TypeTag](listener: EventType => Unit): this.type = {
     val tpe = ru.typeOf[EventType]
-    var registered = false
     for (key <- listeners.keys; if key <:< tpe) {
-      listeners(key) += new EventListener[EventType](listener)
-      registered = true
+      listeners.addBinding(key, new EventListener[EventType](listener))
     }
-    if (!registered)
-      throw new UnsupportedOperationException(tpe.toString() + " is neither one of this event bus's event types nor is it a super class of one")
 
     return this
   }
@@ -75,15 +74,11 @@ abstract class EventBus(val eventClasses: List[ru.Type]) {
 
     // This set could be used for sorting listener priorities in the future
     val foundListeners = new HashSet[EventListener[_]]
-    var foundClasses = false
     for (key <- listeners.keys; if tpe <:< key) {
       for (listener <- listeners(key)) {
         foundListeners += listener
       }
-      foundClasses = true
     }
-    if (!foundClasses)
-      throw new UnsupportedOperationException(tpe + " is too generic an event for this event bus")
     foundListeners.foreach(_(event))
   }
 }

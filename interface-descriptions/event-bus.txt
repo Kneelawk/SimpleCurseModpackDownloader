@@ -18,3 +18,7 @@ Seperate classes for each set of events.
 Requires macros for non-tedious implementation.
 
 This kind of event bus might morph more into a task builder.
+
+I'm having too much trouble implementing a system that uses different kinds of event busses for different kinds of tasks.
+I'm needing to be able to throw events that are only specified in AbstractTask, making the need for some kind of way to
+have all event busses that are used in an AbstractTask to all have some common events. Things are getting messy.
