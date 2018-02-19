@@ -23,7 +23,7 @@ object NetworkContext {
 }
 
 class NetworkContextBuilder(b: HttpAsyncClientBuilder) {
-  def setUserAgent(userAgent: String) = b.setUserAgent(userAgent)
+  def setUserAgent(userAgent: String): this.type = { b.setUserAgent(userAgent); this }
 
   def build(): NetworkContext = new NetworkContext(b.build())
 }
