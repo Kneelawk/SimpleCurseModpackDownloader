@@ -17,3 +17,26 @@ would be killing the zombie task and then leaving it up to the tasks parent (and
 Would it be necessary for a task to be rebuilt when it's restarted?
 
 Zombie killers should be just things that go through task manifests and kill zombie ones.
+
+One problem with zombie killers: If a task freezes (can't update it's update time) then its parent tasks will freeze as well.
+How can a zombie killer make sure a frozen task it finds is the root of the problem?
+One idea is to have the zombie killer, once it has found a frozen task, to through its children to see if any of them are
+frozen as well or if they are over some time less than the frozen ammount of time but still an unusual amount of time since
+they updated the update time. And if none of the children are unusually over time, then kill the parent task.
+
+The problems with that would likely be that if a hierarchical task has a bunch of children that have more children with
+descendants on and on, it could be kept from updating for a good while, even if none of the children were frozen.
+There are a couple solutions for that.
+
+One is where the zombie killer goes through the least updated branch of tasks.
+
+Another is where child tasks update their parent tasks.
+
+My favorite one is where zombie killers don't kill parent tasks. Because if a task has children, then it's not in its own
+execution. The main problem with that is that is what if a parent task starts a bunch of child tasks in different threads,
+then freezes in whatever it's doing. Maybe there should be some sort of flag that tasks have indicating whether they have
+their own execution or if they're blocked by a child task. Blocked tasks won't get zombie killed.
+
+If zombie killers are responsible for sending prune updates to task manifests, should they be called something more general
+like task manifest maintainers?
+

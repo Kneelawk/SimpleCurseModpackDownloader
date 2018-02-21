@@ -14,3 +14,9 @@ to a parent task and the task builder must have a way to register events.
 I think I like having all task builders handle events. I also kind of like the idea of adding a task builder to a parent
 task being the way to start that task builder's task. I think there would be some problems though. I remember there was
 a reason i liked having the builders do their thing and not relying on the parent so much.
+
+Would a parent task need to remove dead children from its list?
+I'm not actually sure that would be necessary.
+
+Then the overall task manifest would get pruned every time it was updated. Like when a zombie killer was about to go
+through it.
