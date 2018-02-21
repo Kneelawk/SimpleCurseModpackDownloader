@@ -12,3 +12,5 @@ will get called.
 Maybe I should use an ExecutionContext to help with this?
 
 This also means that all updated variables in a task should actually be atomic.
+
+Should task handlers have an await sort of thing?
