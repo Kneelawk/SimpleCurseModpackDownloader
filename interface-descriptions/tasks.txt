@@ -20,3 +20,8 @@ I'm not actually sure that would be necessary.
 
 Then the overall task manifest would get pruned every time it was updated. Like when a zombie killer was about to go
 through it.
+
+Looks like we'll have to force tasks to expose their event busses (forcing all tasks to have event busses, but that kinda
+makes sense now that we force all TaskBuilders to have event busses). This is so that a parent task can add child tasks
+without being forced to manage the building of those child tasks but while still being able to register listeners for when
+the task ends.
