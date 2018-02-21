@@ -1,3 +1,3 @@
 package org.kneelawk.simplecursemodpackdownloader.task
 
-case class TaskInterruptEvent(state: InterruptState)
+case class TaskInterruptEvent(task: Task, state: InterruptState)

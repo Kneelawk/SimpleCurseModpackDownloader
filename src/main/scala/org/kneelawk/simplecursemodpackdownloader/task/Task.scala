@@ -1,5 +1,7 @@
 package org.kneelawk.simplecursemodpackdownloader.task
 
+import org.kneelawk.simplecursemodpackdownloader.event.EventBus
+
 /*
  * Tasks be hierarchical.
  * Task factories create tasks of different types.
@@ -30,11 +32,21 @@ trait Task {
    *  
    */
   def addChild(child: Task)
+  
+  /** Gets this task's event bus.
+   *  
+   */
+  def getBus: EventBus
 
   /** Gets the state of this engine.
    *  
    */
   def getState: EngineState
+  
+  /** Is this task still allive/restartable?
+   *  
+   */
+  def isAllive: Boolean = !getState.isInstanceOf[StoppedEngineState]
   
   /** Gets the last time this engine reported an update
    *  

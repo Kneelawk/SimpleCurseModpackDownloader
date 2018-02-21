@@ -30,6 +30,6 @@ class TaskManifest {
    *  
    */
   def pruneTasks() {
-    tasks.retain((t) => !t.getState.isInstanceOf[StoppedEngineState])
+    tasks.retain(_.isAllive)
   }
 }

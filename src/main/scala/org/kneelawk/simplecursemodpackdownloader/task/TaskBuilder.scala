@@ -1,11 +1,11 @@
 package org.kneelawk.simplecursemodpackdownloader.task
 
 trait TaskBuilder {
-  /** Used for setting the task's parent
+  /** Get this tasks event bus.
    *  
-   * This is important for hierarchical tasks.
+   *  Used for registering listeners before the task has started.
    */
-  def setParent(parent: Task): this.type
+  def getBus: TaskEventBus[this.type]
   
   /** Builds the task
    *  
