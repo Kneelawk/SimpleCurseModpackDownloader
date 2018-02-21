@@ -25,3 +25,5 @@ Looks like we'll have to force tasks to expose their event busses (forcing all t
 makes sense now that we force all TaskBuilders to have event busses). This is so that a parent task can add child tasks
 without being forced to manage the building of those child tasks but while still being able to register listeners for when
 the task ends.
+
+Should there be ExecutionContexts thrown around here?
