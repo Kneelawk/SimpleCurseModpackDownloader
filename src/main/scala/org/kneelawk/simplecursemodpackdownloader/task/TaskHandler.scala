@@ -8,6 +8,7 @@ import scala.concurrent.Future
 class TaskHandler(task: Task)(implicit ctx: ExecutionContext) {
   private val done = new CountDownLatch(1)
   
+  // register state change listeners on the task for restarting
   task.getBus.register((e: TaskStateChangeEvent) => {
     if (e.state.isInstanceOf[RestartableEngineState]) {
       start()
@@ -16,16 +17,25 @@ class TaskHandler(task: Task)(implicit ctx: ExecutionContext) {
     }
   })
 
+  /**
+   * Start the task in the supplied execution context and return immediately
+   */
   def start() {
     Future {
       task.start()
     }
   }
 
+  /**
+   * Wait for the task to enter a StoppedEngineState.
+   */
   def await() {
     done.await()
   }
 
+  /**
+   * Wait a specific amount of time for the task to enter a StoppedEngineState.
+   */
   def await(d: Duration) {
     done.await(d.length, d.unit)
   }
