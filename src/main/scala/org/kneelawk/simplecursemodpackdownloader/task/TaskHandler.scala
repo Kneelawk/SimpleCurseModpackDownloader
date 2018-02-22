@@ -5,24 +5,49 @@ import java.util.concurrent.CountDownLatch
 import scala.concurrent.duration.Duration
 import scala.concurrent.Future
 
-class TaskHandler(task: Task)(implicit ctx: ExecutionContext) {
+class TaskHandler(child: Task, parent: Task, blocked: BlockableHandle)(implicit ctx: ExecutionContext) {
+
+  /**
+   * A constructor that doesn't bother with the BlockableHandle.
+   */
+  def this(child: Task, parent: Task)(implicit ctx: ExecutionContext) = this(child, parent, null)(ctx)
+
   private val done = new CountDownLatch(1)
-  
+
   // register state change listeners on the task for restarting
-  task.getBus.register((e: TaskStateChangeEvent) => {
+  child.getBus.register((e: TaskStateChangeEvent) => {
     if (e.state.isInstanceOf[RestartableEngineState]) {
-      start()
+      startImpl()
     } else if (e.state.isInstanceOf[StoppedEngineState]) {
       done.countDown()
+
+      // child task is done parent execution returns
+      if (blocked != null)
+        blocked.setBlocked(false)
     }
   })
 
   /**
-   * Start the task in the supplied execution context and return immediately
+   * Start the task in the supplied execution context and return immediately.
+   *
+   * This also adds the child task to the parent task and sets the blocked handle to true if it isn't null.
    */
-  def start() {
+  def start(): this.type = {
+    // lets take care of this here too
+    parent.addChild(child)
+
+    // child task is blocking parent execution
+    if (blocked != null)
+      blocked.setBlocked(true)
+
+    startImpl()
+
+    this
+  }
+
+  private def startImpl() {
     Future {
-      task.start()
+      child.start()
     }
   }
 
