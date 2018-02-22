@@ -10,11 +10,21 @@ class TaskManifest {
    *  
    */
   def addTask(task: Task) = tasks += task
+  
+  /** Add a task to the manifest.
+   *  
+   */
+  def +=(task: Task) = tasks += task
 
   /** Remove a task from the manifest.
    *  
    */
   def removeTask(task: Task) = tasks -= task
+  
+  /** Remove a task from the manifest.
+   *  
+   */
+  def -=(task: Task) = tasks -= task
 
   /** Get a list of tasks in the manifest.
    *  

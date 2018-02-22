@@ -1,13 +1,16 @@
 package org.kneelawk.simplecursemodpackdownloader.task
 
-import scala.collection.mutable.ListBuffer
+import java.util.concurrent.locks.ReentrantLock
 
 import org.kneelawk.simplecursemodpackdownloader.event.EventBus
+import org.kneelawk.simplecursemodpackdownloader.util.LockUtil.lock
+import org.kneelawk.simplecursemodpackdownloader.util.LockUtil.tryLock
 
-abstract class AbstractTask(eventBus: EventBus) extends Task {
-  // TODO do something with TaskManifests
+abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest: TaskManifest) extends Task {
 
-  protected val children = new ListBuffer[Task]
+  // Am I making a mess?
+  protected val children = new TaskManifest
+  protected val childrenLock = new ReentrantLock
   @volatile protected var state: EngineState = EngineState.NotStarted
   @volatile protected var lastUpdate: Long = 0
 
@@ -16,10 +19,15 @@ abstract class AbstractTask(eventBus: EventBus) extends Task {
       throw new IllegalStateException("A task cannot be running when added to a parent")
     }
 
-    // FIXME this is a deadlock situation
-    task.getBus.register((e: TaskStateChangeEvent) => if (!e.task.isAllive) children.synchronized(children -= e.task))
+    task.getBus.register((e: TaskStateChangeEvent) => {
+      if (!e.task.isAllive) {
+        tryLock(childrenLock)(children -= e.task)
+      }
+    })
 
-    children.synchronized(children += task)
+    lock(childrenLock)(children += task)
+
+    manifest += task
   }
 
   def getBus = eventBus
@@ -29,8 +37,13 @@ abstract class AbstractTask(eventBus: EventBus) extends Task {
   def getState = state
 
   def interrupt(state: InterruptState) {
-    // FIXME this is a deadlock situation
-    children.synchronized(children.foreach(_.interrupt(state)))
+    lock(childrenLock)(children.foreach(_.interrupt(state)))
+
+    // No lock required.
+    // The only reason this could cause a ConcurrentModificationException
+    // would be if this method were called from two different threads at the same time.
+    children.pruneTasks()
+
     onInterrupt(state)
     eventBus.sendEvent(new TaskInterruptEvent(this, state))
   }

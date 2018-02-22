@@ -27,3 +27,8 @@ without being forced to manage the building of those child tasks but while still
 the task ends.
 
 Should there be ExecutionContexts thrown around here?
+Not if at all possible please. They might still be required to be passed through the task hierarchy but I don't want to rely
+on them for simple task implementations.
+
+How should TaskManifests be passed around?
+Should they be implicit?

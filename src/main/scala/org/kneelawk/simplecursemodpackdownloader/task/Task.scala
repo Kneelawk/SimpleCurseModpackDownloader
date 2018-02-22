@@ -30,6 +30,7 @@ trait Task {
   
   /** Adds a child task as a component of this task.
    *  
+   *  All child tasks added should be in state: NotStarted
    */
   def addChild(child: Task)
   

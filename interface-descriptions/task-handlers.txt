@@ -6,8 +6,8 @@ How should a TaskHandler know a task has crashed?
 Through events?
 
 The thing with events is that events are called in the same thread as they're fired. And they're all called sequentially.
-This means that if i restart a blocking task (one that happens all in the start function) then none of the other listeners
-will get called.
+This means that if i restart a blocking task (one that happens all in the start function) in its event callback, then none
+of the other listeners will get called.
 
 Maybe I should use an ExecutionContext to help with this?
 
