@@ -42,4 +42,9 @@ class TaskManifest {
   def pruneTasks() {
     tasks.retain(_.isAllive)
   }
+  
+  /** Converts this TaskManifest into an immutable list of tasks.
+   *  
+   */
+  def toList: List[Task] = tasks.toList
 }

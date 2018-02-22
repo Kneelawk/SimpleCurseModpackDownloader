@@ -8,9 +8,7 @@ import org.kneelawk.simplecursemodpackdownloader.util.LockUtil.tryLock
 
 abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest: TaskManifest) extends Task {
 
-  // Am I making a mess?
   protected val children = new TaskManifest
-  protected val childrenLock = new ReentrantLock
   @volatile protected var state: EngineState = EngineState.NotStarted
   @volatile protected var lastUpdate: Long = 0
 
@@ -21,11 +19,11 @@ abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest:
 
     task.getBus.register((e: TaskStateChangeEvent) => {
       if (!e.task.isAllive) {
-        tryLock(childrenLock)(children -= e.task)
+        children -= e.task
       }
     })
 
-    lock(childrenLock)(children += task)
+    children += task
 
     manifest += task
   }
@@ -37,11 +35,8 @@ abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest:
   def getState = state
 
   def interrupt(state: InterruptState) {
-    lock(childrenLock)(children.foreach(_.interrupt(state)))
-
-    // No lock required.
-    // The only reason this could cause a ConcurrentModificationException
-    // would be if this method were called from two different threads at the same time.
+    // no more need for a lock when iterating over an immutable copy of children
+    children.toList.foreach(_.interrupt(state))
     children.pruneTasks()
 
     onInterrupt(state)
