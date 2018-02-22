@@ -14,11 +14,16 @@ Maybe I should use an ExecutionContext to help with this?
 This also means that all updated variables in a task should actually be atomic.
 
 Should task handlers have an await sort of thing?
+This seems like it could be handy maybe.
 
 Should task handlers be responsible for adding child tasks to parent tasks? (Just to get that detail out of the way?)
+This seems like the most convenient place to put it though it does seem a little strange still.
 
 Should task handlers do anything with building tasks?
+No, this would just make things too complicated.
 
 Should task handlers do anything with their parent task's isBlocked sort of thing?
+It seems easiest to have some sort of handle that the TaskHandler knows how to use.
 
 Should task handlers handle adding child tasks to the task manifests?
+This seems like the place to do it.

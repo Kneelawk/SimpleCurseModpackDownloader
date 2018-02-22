@@ -6,7 +6,7 @@ import org.kneelawk.simplecursemodpackdownloader.event.EventBus
 import org.kneelawk.simplecursemodpackdownloader.util.LockUtil.lock
 import org.kneelawk.simplecursemodpackdownloader.util.LockUtil.tryLock
 
-abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest: TaskManifest) extends Task {
+abstract class AbstractTask(eventBus: EventBus) extends Task {
 
   protected val children = new TaskManifest
   @volatile protected var state: EngineState = EngineState.NotStarted
@@ -25,8 +25,6 @@ abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest:
     })
 
     children += task
-
-    manifest += task
   }
 
   override def getBus = eventBus

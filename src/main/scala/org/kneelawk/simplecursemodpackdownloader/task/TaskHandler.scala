@@ -5,12 +5,14 @@ import java.util.concurrent.CountDownLatch
 import scala.concurrent.duration.Duration
 import scala.concurrent.Future
 
-class TaskHandler(child: Task, parent: Task, blocked: BlockableHandle)(implicit ctx: ExecutionContext) {
+class TaskHandler(child: Task, parent: Task, blocked: BlockableHandle)(implicit ctx: ExecutionContext,
+    manifest: TaskManifest) {
 
   /**
    * A constructor that doesn't bother with the BlockableHandle.
    */
-  def this(child: Task, parent: Task)(implicit ctx: ExecutionContext) = this(child, parent, null)(ctx)
+  def this(child: Task, parent: Task)(implicit ctx: ExecutionContext, manifest: TaskManifest) =
+    this(child, parent, null)(ctx, manifest)
 
   private val done = new CountDownLatch(1)
 
@@ -35,6 +37,8 @@ class TaskHandler(child: Task, parent: Task, blocked: BlockableHandle)(implicit 
   def start(): this.type = {
     // lets take care of this here too
     parent.addChild(child)
+
+    manifest.addTask(child)
 
     // child task is blocking parent execution
     if (blocked != null)
