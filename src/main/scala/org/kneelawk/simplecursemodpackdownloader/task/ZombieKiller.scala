@@ -14,7 +14,8 @@ object ZombieKiller {
     manifest.pruneTasks()
     val currentTime = System.currentTimeMillis()
     manifest.foreach(t => {
-      if (currentTime - t.getLastUpdateTime > zombieTaskWait.toMillis && !t.isBlocked) {
+      if (currentTime - t.getLastUpdateTime > zombieTaskWait.toMillis
+        && !t.isBlocked && !t.getState.isInstanceOf[HaltingEngineState]) {
         t.interrupt(InterruptState.ZombieKill)
       }
     })

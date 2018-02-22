@@ -51,8 +51,8 @@ class ModpackEngine(client: Http, authToken: String, modpack: ModpackManifest,
       while (engines.size > 0) {
         engines = engines.filter(e => e.state != Finished)
         engines.filter(_.state == Crashed).foreach(_.start)
-        if (engines.count(_.state == Abort) > 0) {
-          return Abort
+        if (engines.count(_.state == Aborted) > 0) {
+          return Aborted
         }
         if (engines.count(_.state == Dead) > 0) {
           return Dead
@@ -67,7 +67,7 @@ class ModpackEngine(client: Http, authToken: String, modpack: ModpackManifest,
     }
 
     val result = engineLoop
-    if (result == Abort) {
+    if (result == Aborted) {
       listener.onAbort
     } else if (result == Dead) {
       listener.onDeath

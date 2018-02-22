@@ -13,9 +13,9 @@ object EngineState {
   object Finished extends EngineState with StoppedEngineState
   object Crashed extends EngineState with RestartableEngineState
   object Dead extends EngineState with StoppedEngineState
-  object Aborting extends EngineState
+  object Aborting extends EngineState with HaltingEngineState
   object Aborted extends EngineState with StoppedEngineState
-  object ZombieKilling extends EngineState
+  object ZombieKilling extends EngineState with HaltingEngineState
   object ZombieKilled extends EngineState with RestartableEngineState
 }
 
@@ -23,3 +23,4 @@ sealed trait EngineState
 
 sealed trait RestartableEngineState extends EngineState
 sealed trait StoppedEngineState extends EngineState
+sealed trait HaltingEngineState extends EngineState
