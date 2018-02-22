@@ -13,7 +13,7 @@ object ZombieKiller {
   def killZombies(manifest: TaskManifest, zombieTaskWait: Duration) {
     manifest.pruneTasks()
     val currentTime = System.currentTimeMillis()
-    manifest.toList.foreach(t => {
+    manifest.foreach(t => {
       if (currentTime - t.getLastUpdateTime > zombieTaskWait.toMillis && !t.isBlocked) {
         t.interrupt(InterruptState.ZombieKill)
       }

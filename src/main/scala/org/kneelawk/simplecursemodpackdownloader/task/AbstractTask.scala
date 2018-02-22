@@ -36,7 +36,7 @@ abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest:
 
   def interrupt(state: InterruptState) {
     // no more need for a lock when iterating over an immutable copy of children
-    children.toList.foreach(_.interrupt(state))
+    children.foreach(_.interrupt(state))
     children.pruneTasks()
 
     onInterrupt(state)
