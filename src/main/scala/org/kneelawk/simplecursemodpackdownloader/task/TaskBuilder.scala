@@ -5,7 +5,7 @@ trait TaskBuilder {
    *  
    *  Used for registering listeners before the task has started.
    */
-  def getBus: TaskEventBus[this.type]
+  def getBus: TaskEventBus[_ <: TaskBuilder]
   
   /** Builds the task
    *  
