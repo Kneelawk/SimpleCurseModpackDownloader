@@ -1,7 +1,7 @@
 package org.kneelawk.simplecursemodpackdownloader.task
 
 object InterruptState {
-//  val Abort, ZombieKill = Value
+  object None extends InterruptState
   object Abort extends InterruptState
   object ZombieKill extends InterruptState
 }
