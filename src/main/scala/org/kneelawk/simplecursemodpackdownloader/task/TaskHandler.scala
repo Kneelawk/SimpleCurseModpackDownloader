@@ -54,6 +54,11 @@ class TaskHandler(child: Task, parent: Task, blocked: BlockableHandle)(implicit 
       child.start()
     }
   }
+  
+  /**
+   * Is this task done?
+   */
+  def isDone: Boolean = done.getCount == 0
 
   /**
    * Wait for the task to enter a StoppedEngineState.
