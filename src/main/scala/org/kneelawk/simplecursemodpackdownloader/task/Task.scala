@@ -49,6 +49,11 @@ trait Task {
    */
   def isAllive: Boolean = !getState.isInstanceOf[StoppedEngineState]
   
+  /** Is this task currently in its own execution?
+   *  
+   */
+  def isBlocked: Boolean
+  
   /** Gets the last time this engine reported an update
    *  
    *  This is for zombie identification
