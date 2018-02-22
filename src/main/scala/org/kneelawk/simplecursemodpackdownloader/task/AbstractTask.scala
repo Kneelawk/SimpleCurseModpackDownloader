@@ -11,6 +11,7 @@ abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest:
   protected val children = new TaskManifest
   @volatile protected var state: EngineState = EngineState.NotStarted
   @volatile protected var lastUpdate: Long = 0
+  @volatile protected var blocked: Boolean = false
 
   override def addChild(task: Task) {
     if (task.getState != EngineState.NotStarted) {
@@ -28,13 +29,15 @@ abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest:
     manifest += task
   }
 
-  def getBus = eventBus
+  override def getBus = eventBus
 
-  def getLastUpdateTime = lastUpdate
+  override def getLastUpdateTime = lastUpdate
 
-  def getState = state
+  override def getState = state
+  
+  override def isBlocked = blocked
 
-  def interrupt(state: InterruptState) {
+  override def interrupt(state: InterruptState) {
     // no more need for a lock when iterating over an immutable copy of children
     children.foreach(_.interrupt(state))
     children.pruneTasks()
@@ -52,5 +55,9 @@ abstract class AbstractTask(eventBus: EventBus)(implicit protected val manifest:
   protected def setState(state: EngineState) = {
     this.state = state
     eventBus.sendEvent(new TaskStateChangeEvent(this, state))
+  }
+  
+  protected object BlockedHandle extends BlockableHandle {
+    override def setBlocked(b: Boolean) = blocked = b
   }
 }
