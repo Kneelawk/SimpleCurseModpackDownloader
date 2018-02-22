@@ -20,3 +20,5 @@ Should task handlers be responsible for adding child tasks to parent tasks? (Jus
 Should task handlers do anything with building tasks?
 
 Should task handlers do anything with their parent task's isBlocked sort of thing?
+
+Should task handlers handle adding child tasks to the task manifests?
