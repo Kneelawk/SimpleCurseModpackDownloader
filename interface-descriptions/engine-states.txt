@@ -1,0 +1,8 @@
+Should engine states have states for when they're stopping but not quite stopped yet?
+
+Things like a KillingZombie state to indicate that the task has received the ZombieKill interrupt, but isn't completely
+shut down yet?
+
+Should this apply just to zombie kills or should it apply to other things as well?
+
+Maybe just the states that are caused by interrupts then?
