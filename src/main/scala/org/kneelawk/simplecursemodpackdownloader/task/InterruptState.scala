@@ -12,3 +12,5 @@ object InterruptState {
  *  ZombieKill - a signal that a zombie killer has found this task to be unresponsive and is attempting to restart it.
  */
 sealed trait InterruptState
+
+case class InterruptException(state: InterruptState) extends Exception
