@@ -10,7 +10,7 @@ abstract class AbstractTask(eventBus: EventBus) extends Task {
 
   protected val children = new TaskManifest
   @volatile protected var state: EngineState = EngineState.NotStarted
-  @volatile protected var lastUpdate: Long = 0
+  @volatile protected var lastUpdate: Long = System.currentTimeMillis()
   @volatile protected var blocked: Boolean = false
 
   override def addChild(task: Task) {
