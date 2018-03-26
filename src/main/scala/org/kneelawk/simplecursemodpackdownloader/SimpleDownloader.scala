@@ -13,6 +13,13 @@ import dispatch.Defaults.executor
 import dispatch.Future
 import dispatch.Http
 import dispatch.enrichFuture
+import org.kneelawk.simplecursemodpackdownloader.net.NetworkContext
+import org.kneelawk.simplecursemodpackdownloader.task.TaskManifest
+import org.kneelawk.simplecursemodpackdownloader.net.FileDownloadTaskBuilder
+import org.apache.http.client.methods.HttpGet
+import org.kneelawk.simplecursemodpackdownloader.net.FileDownloadProgressEvent
+import org.kneelawk.simplecursemodpackdownloader.net.FileDownloadFailedEvent
+import org.kneelawk.simplecursemodpackdownloader.net.FileDownloadCompleteEvent
 
 object SimpleDownloader {
   def apply(args: Array[String]) {
@@ -30,8 +37,8 @@ object SimpleDownloader {
       .setFollowRedirect(true)
       .build()
     val client = new Http(new AsyncHttpClient(config))
-    val downloadClient = HttpAsyncClients.createDefault()
-    downloadClient.start()
+    val netCtx = NetworkContext()
+    netCtx.start()
     try {
       println("Getting mod download...")
       val futDownload = Future({
@@ -56,25 +63,25 @@ object SimpleDownloader {
         val outFile = new File(outDir, file.diskFileName)
         println(file.downloadUrl)
         val sanitaryUri = URIUtil.sanitizeCurseDownloadUri(file.downloadUrl, true)
-        new Download(outFile, sanitaryUri.toASCIIString())
-          .onDownloadProgress(progress => println(progress.downloaded + " / " + progress.maxSize))
-          .onDownloadError(_.printStackTrace())
-          .onDownloadError(t => {
-            t.printStackTrace()
+        new FileDownloadTaskBuilder(netCtx).setFile(outFile).setRequest(new HttpGet(sanitaryUri)).getBus
+          .register((e: FileDownloadProgressEvent) => println(e.current + " / " + e.max))
+          .register((e: FileDownloadFailedEvent) => {
+            e.exception.printStackTrace()
             client.shutdown()
-            downloadClient.close()
+            netCtx.close()
           })
-          .onDownloadComplete(complete => {
+          .register((e: FileDownloadCompleteEvent) => {
             println("Done.")
             client.shutdown()
-            downloadClient.close()
+            netCtx.close()
           })
-          .start(downloadClient)
+          .builder.build().start()
       }
     } catch {
       case _: Exception =>
         client.shutdown()
-        downloadClient.close()
+//        downloadClient.close()
+        netCtx.close()
     }
   }
 }
