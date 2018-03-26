@@ -222,7 +222,7 @@ class FileDownloadTask(netCtx: NetworkContext, eventBus: EventBus, req: HttpUriR
 
       while (cd.read(buf) > 0 || buf.position() != 0) {
         buf.flip()
-        downloaded = channel.write(buf)
+        downloaded += channel.write(buf)
         buf.compact()
       }
 
