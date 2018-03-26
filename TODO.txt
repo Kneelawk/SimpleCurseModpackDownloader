@@ -1,4 +1,5 @@
 Things that still need to be done:
+Migrate to SOAP interface.
 Route mod redirection events to the final event handler.
 Throw out dispatch.
 Add proper abort support.
