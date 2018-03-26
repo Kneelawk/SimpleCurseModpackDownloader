@@ -62,9 +62,7 @@ abstract class EventBus() {
 
   def register[EventType: ru.TypeTag](listener: EventType => Unit): this.type = {
     val tpe = ru.typeOf[EventType]
-    for (key <- listeners.keys; if key <:< tpe) {
-      listeners.addBinding(key, new EventListener[EventType](listener))
-    }
+    listeners.addBinding(tpe, new EventListener[EventType](listener))
 
     return this
   }
