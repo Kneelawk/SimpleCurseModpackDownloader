@@ -1,31 +1,30 @@
 package org.kneelawk.simplecursemodpackdownloader.net
 
 import java.io.File
+import java.io.FileOutputStream
+import java.nio.ByteBuffer
+import java.util.concurrent.{ Future => JFuture }
 
+import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
+import scala.collection.mutable.Set
 
+import org.apache.http.HttpEntity
+import org.apache.http.HttpResponse
 import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.concurrent.FutureCallback
+import org.apache.http.entity.ContentType
+import org.apache.http.nio.ContentDecoder
+import org.apache.http.nio.IOControl
+import org.apache.http.nio.client.methods.HttpAsyncMethods
+import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer
+import org.apache.http.protocol.HttpContext
 import org.kneelawk.simplecursemodpackdownloader.event.EventBus
 import org.kneelawk.simplecursemodpackdownloader.task.AbstractTask
+import org.kneelawk.simplecursemodpackdownloader.task.EngineState
 import org.kneelawk.simplecursemodpackdownloader.task.InterruptState
 import org.kneelawk.simplecursemodpackdownloader.task.TaskBuilder
 import org.kneelawk.simplecursemodpackdownloader.task.TaskEventBus
-import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer
-import org.apache.http.protocol.HttpContext
-import org.apache.http.nio.ContentDecoder
-import org.apache.http.nio.IOControl
-import org.apache.http.HttpEntity
-import org.apache.http.entity.ContentType
-import org.apache.http.HttpResponse
-import org.apache.http.nio.client.methods.HttpAsyncMethods
-import org.apache.http.concurrent.FutureCallback
-import org.kneelawk.simplecursemodpackdownloader.task.EngineState
-import java.util.concurrent.{ Future => JFuture }
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.Set
-import java.io.IOException
-import java.io.FileOutputStream
-import java.nio.ByteBuffer
 
 /**
  * Event sent when the download starts
