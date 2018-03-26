@@ -32,7 +32,7 @@ import java.nio.ByteBuffer
  *
  * All headers are lower-case.
  */
-case class DownloadStartedEvent(req: HttpUriRequest, file: File, statusCode: Int,
+case class FileDownloadStartedEvent(req: HttpUriRequest, file: File, statusCode: Int,
     statusText: String, headers: MultiMap[String, String]) {
   private var invalidResponse: InvalidResponseType = InvalidResponseType.None
 
@@ -57,38 +57,22 @@ case class DownloadStartedEvent(req: HttpUriRequest, file: File, statusCode: Int
 /**
  * Event sent every time new content is received.
  */
-case class DownloadProgressEvent(current: Long, max: Long)
+case class FileDownloadProgressEvent(current: Long, max: Long)
 
 /**
  * Event sent when the download completed successfully.
  */
-case class DownloadCompleteEvent(file: File, size: Long)
+case class FileDownloadCompleteEvent(file: File, size: Long)
 
 /**
  * Event sent if the download failed.
  */
-case class DownloadFailedEvent(exception: Exception)
-
-/**
- * Thrown when a DownloadStartedEvent has its invalid response flag set.
- */
-case class InvalidResponseException(req: HttpUriRequest, file: File, tpe: InvalidResponseType,
-  statusCode: Int, statusText: String, headers: MultiMap[String, String]) extends IOException
-
-/**
- * Kinds of invalid responses.
- */
-trait InvalidResponseType
-object InvalidResponseType {
-  object None extends InvalidResponseType
-  object Recoverable extends InvalidResponseType
-  object Fatal extends InvalidResponseType
-}
+case class FileDownloadFailedEvent(file: File, exception: Exception)
 
 /**
  * Builds a DownloadTask.
  */
-class DownloadTaskBuilder(netCtx: NetworkContext) extends TaskBuilder {
+class FileDownloadTaskBuilder(netCtx: NetworkContext) extends TaskBuilder {
   private val eventBus = new TaskEventBus(this)
   private var req: HttpUriRequest = null
   private var file: File = null
@@ -105,18 +89,18 @@ class DownloadTaskBuilder(netCtx: NetworkContext) extends TaskBuilder {
 
   def getBus = eventBus
 
-  def build(): DownloadTask = {
+  def build(): FileDownloadTask = {
     if (req == null) throw new IllegalStateException("The request has not been set")
     if (file == null) throw new IllegalStateException("The file has not been set")
 
-    return new DownloadTask(netCtx, eventBus, req, file)
+    return new FileDownloadTask(netCtx, eventBus, req, file)
   }
 }
 
 /**
  * The download task.
  */
-class DownloadTask(netCtx: NetworkContext, eventBus: EventBus, req: HttpUriRequest, file: File) extends AbstractTask(eventBus) {
+class FileDownloadTask(netCtx: NetworkContext, eventBus: EventBus, req: HttpUriRequest, file: File) extends AbstractTask(eventBus) {
   var interruptState: InterruptState = null
   var downloadFuture: JFuture[File] = null
 
@@ -167,7 +151,7 @@ class DownloadTask(netCtx: NetworkContext, eventBus: EventBus, req: HttpUriReque
       def completed(file: File) {
         setState(EngineState.Finished)
 
-        getBus.sendEvent(DownloadCompleteEvent(file, operation.downloaded))
+        getBus.sendEvent(FileDownloadCompleteEvent(file, operation.downloaded))
       }
 
       /**
@@ -184,7 +168,7 @@ class DownloadTask(netCtx: NetworkContext, eventBus: EventBus, req: HttpUriReque
           setState(EngineState.Crashed)
         }
 
-        getBus.sendEvent(DownloadFailedEvent(ex))
+        getBus.sendEvent(FileDownloadFailedEvent(file, ex))
       }
     })
   }
@@ -208,14 +192,14 @@ class DownloadTask(netCtx: NetworkContext, eventBus: EventBus, req: HttpUriReque
 
       val code = res.getStatusLine.getStatusCode
 
-      val event = DownloadStartedEvent(req, file, code, res.getStatusLine.getReasonPhrase, res.getAllHeaders.foldLeft(
+      val event = FileDownloadStartedEvent(req, file, code, res.getStatusLine.getReasonPhrase, res.getAllHeaders.foldLeft(
         new HashMap[String, Set[String]] with MultiMap[String, String])(
           (acc, header) => acc.addBinding(header.getName.toLowerCase(), header.getValue)))
 
       getBus.sendEvent(event)
 
       if (event.getInvalidResponseType != InvalidResponseType.None) {
-        throw new InvalidResponseException(req, file, event.getInvalidResponseType, code, event.statusText, event.headers)
+        throw new InvalidResponseException(req, event.getInvalidResponseType, code, event.statusText, event.headers)
       }
     }
 
@@ -229,7 +213,7 @@ class DownloadTask(netCtx: NetworkContext, eventBus: EventBus, req: HttpUriReque
     }
 
     /**
-     * When each peice of the content arrives.
+     * When each piece of the content arrives.
      */
     protected def onContentReceived(cd: ContentDecoder, io: IOControl) {
       update()
@@ -242,7 +226,7 @@ class DownloadTask(netCtx: NetworkContext, eventBus: EventBus, req: HttpUriReque
         buf.compact()
       }
 
-      getBus.sendEvent(DownloadProgressEvent(downloaded, maxSize))
+      getBus.sendEvent(FileDownloadProgressEvent(downloaded, maxSize))
     }
 
     /**
